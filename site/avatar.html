@@ -11,29 +11,40 @@
 
   <header class="topbar">
     <div class="inner">
-      <a class="brand" href="play.html" aria-label="Heredita — Play">
-        <img src="assets/heredita-icon.webp" alt="" />
-        <span class="brand-name">Heredita</span>
-      </a>
-      <button class="nav-toggle" aria-label="Toggle navigation">Menu</button>
-      <nav aria-label="Primary">
-        <a href="home.html">Home</a>
-        <a href="play.html">Play</a>
-        <a href="store.html">Store</a>
-        <a href="membership.html">Membership</a>
-        <a href="avatar.html" class="active">Avatar</a>
-        <a href="updates.html">Updates</a>
-        <a href="about.html">About</a>
-      </nav>
-      <div class="spacer"></div>
-      <div class="coin-chip" title="In-game currency — coming soon">
-        <span class="coin" aria-hidden="true"></span>
-        <span>0</span>
-        <span class="soon">coming soon</span>
+      <div class="topbar-left">
+        <a class="brand" href="play.html" aria-label="Heredita — Play">
+          <img src="assets/heredita-icon.webp" alt="" />
+          <span class="brand-name">Heredita</span>
+        </a>
+        <button class="nav-toggle" aria-label="Toggle navigation">Menu</button>
+        <nav aria-label="Primary">
+          <a href="home.html">Home</a>
+          <a href="play.html">Play</a>
+          <a href="store.html">Store</a>
+          <a href="avatar.html" class="active">Avatar</a>
+          <a href="updates.html">Updates</a>
+          <a href="about.html">About</a>
+        </nav>
       </div>
-      <div class="user-chip">
-        <span class="avatar">G</span>
-        <span class="name">Guest</span>
+      <div class="topbar-right">
+        <div class="coin-chip" title="In-game currency — coming soon">
+          <span class="coin" aria-hidden="true"></span>
+          <span>0</span>
+          <span class="soon">coming soon</span>
+        </div>
+        <div class="user-chip">
+          <span class="avatar">G</span>
+          <div class="user-block">
+            <span class="name">Guest</span>
+            <a href="membership.html" class="tier-badge" data-tier="guest">Guest</a>
+          </div>
+        </div>
+        <a class="btn-icon" href="settings.html" aria-label="Settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+        </a>
       </div>
     </div>
   </header>
@@ -96,8 +107,56 @@
 
     </section>
 
+    <!-- COMING SOON -->
+    <div class="section-title reveal" style="margin-top: 36px;">
+      <h2 class="tilt-r">To Be Added Soon</h2>
+      <span class="muted">more flags, hats &amp; props arriving with the Store</span>
+    </div>
+
+    <section class="chalk-card reveal" style="padding: 22px;">
+      <h3 style="font-family:'Caveat',cursive; font-size:1.5rem; margin: 0 0 6px;">Flags in the pipeline</h3>
+      <div class="coming-soon-grid">
+        <div class="coming-soon-tile"><div class="silhouette">?</div><span class="cs-label">Argentina</span><span class="cs-eta">Soon™</span></div>
+        <div class="coming-soon-tile"><div class="silhouette">?</div><span class="cs-label">South Africa</span><span class="cs-eta">Soon™</span></div>
+        <div class="coming-soon-tile"><div class="silhouette">?</div><span class="cs-label">Egypt</span><span class="cs-eta">Soon™</span></div>
+        <div class="coming-soon-tile"><div class="silhouette">?</div><span class="cs-label">Saudi Arabia</span><span class="cs-eta">Soon™</span></div>
+        <div class="coming-soon-tile"><div class="silhouette">?</div><span class="cs-label">Indonesia</span><span class="cs-eta">Soon™</span></div>
+        <div class="coming-soon-tile"><div class="silhouette">?</div><span class="cs-label">Vietnam</span><span class="cs-eta">Soon™</span></div>
+        <div class="coming-soon-tile"><div class="silhouette">?</div><span class="cs-label">Thailand</span><span class="cs-eta">Soon™</span></div>
+        <div class="coming-soon-tile"><div class="silhouette">?</div><span class="cs-label">Philippines</span><span class="cs-eta">Soon™</span></div>
+        <div class="coming-soon-tile"><div class="silhouette">?</div><span class="cs-label">Pakistan</span><span class="cs-eta">Soon™</span></div>
+        <div class="coming-soon-tile"><div class="silhouette">?</div><span class="cs-label">Nigeria</span><span class="cs-eta">Soon™</span></div>
+        <div class="coming-soon-tile"><div class="silhouette">?</div><span class="cs-label">Chile</span><span class="cs-eta">Soon™</span></div>
+        <div class="coming-soon-tile"><div class="silhouette">+ many more</div><span class="cs-eta">v0.5</span></div>
+      </div>
+
+      <h3 style="font-family:'Caveat',cursive; font-size:1.5rem; margin: 22px 0 6px;">Alt-history pipeline</h3>
+      <div class="coming-soon-grid">
+        <div class="coming-soon-tile"><div class="silhouette">?</div><span class="cs-label">Republic of Venice</span><span class="cs-eta">Soon™</span></div>
+        <div class="coming-soon-tile"><div class="silhouette">?</div><span class="cs-label">Mongol Empire</span><span class="cs-eta">Soon™</span></div>
+        <div class="coming-soon-tile"><div class="silhouette">?</div><span class="cs-label">Carthage</span><span class="cs-eta">Soon™</span></div>
+        <div class="coming-soon-tile"><div class="silhouette">?</div><span class="cs-label">Empire of Japan</span><span class="cs-eta">Soon™</span></div>
+        <div class="coming-soon-tile"><div class="silhouette">?</div><span class="cs-label">Qing Dynasty</span><span class="cs-eta">Soon™</span></div>
+        <div class="coming-soon-tile"><div class="silhouette">?</div><span class="cs-label">Aztec Empire</span><span class="cs-eta">Soon™</span></div>
+      </div>
+
+      <h3 style="font-family:'Caveat',cursive; font-size:1.5rem; margin: 22px 0 6px;">New accessories</h3>
+      <div class="coming-soon-grid">
+        <div class="coming-soon-tile"><div class="silhouette">🎓</div><span class="cs-label">Graduation cap</span><span class="cs-eta">Soon™</span></div>
+        <div class="coming-soon-tile"><div class="silhouette">⛑</div><span class="cs-label">Pith helmet</span><span class="cs-eta">Soon™</span></div>
+        <div class="coming-soon-tile"><div class="silhouette">📜</div><span class="cs-label">Treaty scroll</span><span class="cs-eta">Soon™</span></div>
+        <div class="coming-soon-tile"><div class="silhouette">🗡</div><span class="cs-label">Saber prop</span><span class="cs-eta">Soon™</span></div>
+        <div class="coming-soon-tile"><div class="silhouette">🪖</div><span class="cs-label">Beret variants</span><span class="cs-eta">Soon™</span></div>
+        <div class="coming-soon-tile"><div class="silhouette">+</div><span class="cs-label">Frames &amp; banners</span><span class="cs-eta">Store launch</span></div>
+      </div>
+
+      <p class="muted" style="margin-top: 18px; text-align: center;">
+        Want a specific country or accessory next? Pitch us via the <a href="terms.html">contact link</a>.
+      </p>
+    </section>
+
     <p class="muted text-center reveal" style="margin: 24px 0 6px;">
-      More flags, hats and props arriving in the <a href="store.html">Store</a> soon.
+      Browse what's planned in the <a href="store.html">Store</a> — items unlock as they ship.
     </p>
 
   </main>

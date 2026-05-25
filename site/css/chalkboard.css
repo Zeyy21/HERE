@@ -23,6 +23,19 @@
   --accent-soft: #e89968;
   --accent-deep: #b35d28;
 
+  /* Tier colors */
+  --tier-guest-fg:    #c9d1c2;
+  --tier-guest-bg:    rgba(180, 192, 170, 0.18);
+  --tier-guest-bd:    rgba(201, 209, 194, 0.55);
+
+  --tier-regular-fg:  #f4f1e6;
+  --tier-regular-bg:  rgba(244, 241, 230, 0.14);
+  --tier-regular-bd:  rgba(244, 241, 230, 0.65);
+
+  --tier-emperor-fg:  #fff0c6;
+  --tier-emperor-bg:  linear-gradient(135deg, rgba(255,210,80,0.30), rgba(217,122,61,0.30));
+  --tier-emperor-bd:  #f4c95d;
+
   /* Wood / frame */
   --wood-1: #5b3a1f;
   --wood-2: #3a2510;
@@ -1502,6 +1515,272 @@ a.chalk-card:active,
     grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
     max-height: 360px;
   }
+}
+
+/* ============================================================
+   TOPBAR — split into left (brand + nav) and right (account)
+   ============================================================ */
+.topbar .topbar-left,
+.topbar .topbar-right {
+  display: flex; align-items: center; gap: 12px;
+}
+.topbar .topbar-left  { flex: 1 1 auto; min-width: 0; }
+.topbar .topbar-right { flex: 0 0 auto; }
+
+/* visual divider chalk dash between the halves on wide screens */
+.topbar .topbar-right::before {
+  content: "";
+  display: inline-block;
+  width: 2px; height: 28px;
+  border-left: 2px dashed rgba(244,241,230,0.25);
+  margin-right: 4px;
+}
+
+/* TIER BADGE — sits inside user-chip, replaces direct membership link */
+.tier-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: 'Caveat', cursive;
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 2px 10px;
+  border-radius: 999px;
+  border: 1.5px dashed var(--tier-guest-bd);
+  background: var(--tier-guest-bg);
+  color: var(--tier-guest-fg);
+  text-decoration: none;
+  letter-spacing: 0.3px;
+  transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+  line-height: 1.1;
+  cursor: pointer;
+}
+.tier-badge:hover { transform: translateY(-1px); }
+.tier-badge[data-tier="regular"] {
+  border-color: var(--tier-regular-bd);
+  background: var(--tier-regular-bg);
+  color: var(--tier-regular-fg);
+}
+.tier-badge[data-tier="emperor"] {
+  border-color: var(--tier-emperor-bd);
+  border-style: solid;
+  background: var(--tier-emperor-bg);
+  color: var(--tier-emperor-fg);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+  box-shadow: 0 0 0 1px rgba(244,201,93,0.45), 0 0 16px rgba(255,210,80,0.30);
+}
+.tier-badge[data-tier="emperor"]:hover {
+  box-shadow: 0 0 0 1px rgba(244,201,93,0.6), 0 0 22px rgba(255,210,80,0.5);
+}
+.tier-badge .crown {
+  display: inline-block;
+  width: 12px; height: 12px;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M3 19 5 8l5 4 2-7 2 7 5-4 2 11H3zm0 2h18v2H3z'/></svg>") center/contain no-repeat;
+          mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M3 19 5 8l5 4 2-7 2 7 5-4 2 11H3zm0 2h18v2H3z'/></svg>") center/contain no-repeat;
+}
+
+/* Username inside user-chip — make name + tier badge sit nicely */
+.user-chip {
+  gap: 8px;
+}
+.user-chip .name { line-height: 1.1; }
+.user-chip a.tier-badge { border-bottom: none; }
+
+/* The username chip itself becomes a wrapper for name+tier on the right side */
+.user-block {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  line-height: 1.1;
+}
+.user-block .name {
+  font-family: 'Caveat', cursive;
+  font-size: 1.15rem;
+  color: var(--chalk);
+}
+
+/* Settings icon button */
+.btn-icon {
+  width: 38px; height: 38px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 2px dashed rgba(244,241,230,0.55);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--chalk);
+  cursor: pointer;
+  transition: transform .18s ease, background .18s ease, border-color .18s ease;
+  padding: 0;
+}
+.btn-icon:hover {
+  background: rgba(244,241,230,0.10);
+  transform: rotate(35deg);
+  border-color: var(--accent);
+}
+.btn-icon svg { width: 18px; height: 18px; }
+.btn-icon:focus-visible { outline: 2px dashed var(--accent); outline-offset: 3px; }
+
+/* ============================================================
+   SETTINGS PAGE
+   ============================================================ */
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 18px;
+  margin-top: 18px;
+}
+.settings-card h3 {
+  font-family: 'Caveat', cursive;
+  font-size: 1.6rem;
+  margin: 0 0 4px;
+}
+.settings-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 0;
+  border-top: 1px dashed rgba(244,241,230,0.20);
+}
+.settings-row:first-of-type { border-top: none; }
+.settings-row .label {
+  flex: 1; min-width: 0;
+}
+.settings-row .label .key {
+  display: block;
+  font-family: 'Patrick Hand', cursive;
+  font-size: 1.1rem;
+  color: var(--chalk);
+}
+.settings-row .label .desc {
+  display: block;
+  font-size: 0.92rem;
+  color: var(--chalk-faded);
+}
+.settings-row select,
+.settings-row input[type="text"] {
+  font-family: 'Architects Daughter', cursive;
+  color: var(--chalk);
+  background: rgba(0,0,0,0.30);
+  border: 2px dashed rgba(244,241,230,0.45);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 1rem;
+  min-width: 140px;
+}
+.settings-row select:focus,
+.settings-row input:focus {
+  outline: none; border-color: var(--accent); border-style: solid;
+}
+
+/* tier switcher chips on settings */
+.tier-switch {
+  display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px;
+}
+.tier-switch button {
+  font-family: 'Caveat', cursive;
+  font-weight: 700;
+  font-size: 1.1rem;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 2px dashed rgba(244,241,230,0.40);
+  background: rgba(0,0,0,0.25);
+  color: var(--chalk-soft);
+  cursor: pointer;
+  transition: all .15s ease;
+}
+.tier-switch button[data-tier="guest"].active   { background: var(--tier-guest-bg);   color: var(--tier-guest-fg);   border-color: var(--tier-guest-bd);   border-style: solid; }
+.tier-switch button[data-tier="regular"].active { background: var(--tier-regular-bg); color: var(--tier-regular-fg); border-color: var(--tier-regular-bd); border-style: solid; }
+.tier-switch button[data-tier="emperor"].active { background: var(--tier-emperor-bg); color: var(--tier-emperor-fg); border-color: var(--tier-emperor-bd); border-style: solid; box-shadow: 0 0 12px rgba(255,210,80,0.3); }
+
+/* Toggle switch */
+.toggle {
+  position: relative; width: 50px; height: 26px;
+  display: inline-block;
+  flex: 0 0 auto;
+}
+.toggle input { opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+.toggle .track {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,0.45);
+  border: 2px dashed rgba(244,241,230,0.40);
+  border-radius: 999px;
+  transition: background .2s, border-color .2s;
+}
+.toggle .thumb {
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 18px; height: 18px;
+  background: var(--chalk);
+  border-radius: 50%;
+  transition: transform .25s cubic-bezier(.2,.7,.2,1), background .2s;
+}
+.toggle input:checked + .track { background: rgba(217,122,61,0.35); border-color: var(--accent); border-style: solid; }
+.toggle input:checked + .track + .thumb { transform: translateX(24px); background: var(--accent-soft); }
+.toggle input:focus-visible + .track { outline: 2px dashed var(--accent); outline-offset: 3px; }
+
+/* ============================================================
+   COMING-SOON AVATARS GRID
+   ============================================================ */
+.coming-soon-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+.coming-soon-tile {
+  aspect-ratio: 1 / 1.15;
+  border: 2px dashed rgba(244,241,230,0.30);
+  border-radius: 12px;
+  background:
+    repeating-linear-gradient(45deg, rgba(244,241,230,0.04) 0 8px, transparent 8px 16px),
+    rgba(0,0,0,0.25);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 8px;
+  text-align: center;
+  padding: 10px 6px;
+  position: relative;
+  overflow: hidden;
+}
+.coming-soon-tile .silhouette {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  background: rgba(244,241,230,0.15);
+  border: 2px dashed rgba(244,241,230,0.45);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Caveat', cursive;
+  font-size: 1.8rem;
+  color: rgba(244,241,230,0.5);
+}
+.coming-soon-tile .cs-label {
+  font-family: 'Architects Daughter', cursive;
+  font-size: 0.9rem;
+  color: var(--chalk-soft);
+  line-height: 1.15;
+}
+.coming-soon-tile .cs-eta {
+  font-family: 'Caveat', cursive;
+  font-size: 0.95rem;
+  color: var(--accent-soft);
+}
+
+/* Tier label INSIDE the tier card */
+.tier-card .tier-name .badge-inline {
+  display: inline-block;
+  vertical-align: middle;
+  font-family: 'Patrick Hand', cursive;
+  font-size: 0.85rem;
+  margin-left: 8px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  border: 1.5px dashed currentColor;
+  color: var(--chalk-faded);
+  letter-spacing: 0.3px;
+}
+
+/* Responsive nav: hide secondary nav text in cramped widths */
+@media (max-width: 880px) {
+  .topbar .topbar-right::before { display: none; }
+  .user-block .name { font-size: 1.05rem; }
+  .tier-badge { font-size: 0.85rem; padding: 1px 8px; }
 }
 
 /* Reduced motion */

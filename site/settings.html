@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Heredita — Settings</title>
+  <link rel="icon" href="assets/heredita-icon.webp" type="image/webp" />
+  <link rel="stylesheet" href="css/chalkboard.css" />
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="inner">
+      <div class="topbar-left">
+        <a class="brand" href="play.html" aria-label="Heredita — Play">
+          <img src="assets/heredita-icon.webp" alt="" />
+          <span class="brand-name">Heredita</span>
+        </a>
+        <button class="nav-toggle" aria-label="Toggle navigation">Menu</button>
+        <nav aria-label="Primary">
+          <a href="home.html">Home</a>
+          <a href="play.html">Play</a>
+          <a href="store.html">Store</a>
+          <a href="avatar.html">Avatar</a>
+          <a href="updates.html">Updates</a>
+          <a href="about.html">About</a>
+        </nav>
+      </div>
+      <div class="topbar-right">
+        <div class="coin-chip" title="In-game currency — coming soon">
+          <span class="coin" aria-hidden="true"></span>
+          <span>0</span>
+          <span class="soon">coming soon</span>
+        </div>
+        <div class="user-chip">
+          <span class="avatar">G</span>
+          <div class="user-block">
+            <span class="name">Guest</span>
+            <a href="membership.html" class="tier-badge" data-tier="guest">Guest</a>
+          </div>
+        </div>
+        <a class="btn-icon" href="settings.html" aria-label="Settings" style="border-color: var(--accent); color: var(--accent-soft);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" style="padding-top: 22px;">
+
+    <div class="section-title reveal">
+      <h1 class="tilt-l">Settings</h1>
+      <span class="muted">your account &amp; preferences</span>
+    </div>
+
+    <div class="settings-grid">
+
+      <!-- ACCOUNT -->
+      <section class="chalk-card settings-card reveal delay-1">
+        <h3>Account</h3>
+        <p class="muted" style="margin: 0 0 8px; font-size: .95rem;">Sign in to sync your timelines across devices.</p>
+
+        <div class="settings-row">
+          <div class="label">
+            <span class="key" id="acctName">Signed out</span>
+            <span class="desc" id="acctDesc">You're browsing as a guest.</span>
+          </div>
+        </div>
+
+        <div class="settings-row" style="flex-wrap: wrap; gap: 8px;">
+          <a id="signInBtn" class="btn btn-primary" href="index.html">Sign in</a>
+          <button id="signOutBtn" class="btn" type="button" style="display:none;">Sign out</button>
+        </div>
+      </section>
+
+      <!-- TIER -->
+      <section class="chalk-card settings-card reveal delay-2">
+        <h3>Membership tier</h3>
+        <p class="muted" style="margin: 0 0 8px; font-size: .95rem;">
+          Preview a tier locally (real upgrades arrive with the Store).
+        </p>
+        <div class="tier-switch" role="radiogroup" aria-label="Tier preview">
+          <button type="button" data-tier="guest">Guest</button>
+          <button type="button" data-tier="regular">Regular</button>
+          <button type="button" data-tier="emperor">Emperor</button>
+        </div>
+        <div class="settings-row">
+          <div class="label">
+            <span class="key">Compare tiers</span>
+            <span class="desc">See what each membership unlocks.</span>
+          </div>
+          <a class="btn btn-ghost" href="membership.html">Membership →</a>
+        </div>
+      </section>
+
+      <!-- LANGUAGE -->
+      <section class="chalk-card settings-card reveal delay-3">
+        <h3>Language</h3>
+        <div class="settings-row">
+          <div class="label">
+            <span class="key">Display language</span>
+            <span class="desc">More languages arriving with v0.6.</span>
+          </div>
+          <select id="langSelect" aria-label="Language">
+            <option value="en">English</option>
+            <option value="fr" disabled>Français — soon</option>
+            <option value="es" disabled>Español — soon</option>
+            <option value="de" disabled>Deutsch — soon</option>
+            <option value="pl" disabled>Polski — soon</option>
+            <option value="ja" disabled>日本語 — soon</option>
+          </select>
+        </div>
+        <div class="settings-row">
+          <div class="label">
+            <span class="key">Region (for in-game holidays)</span>
+            <span class="desc">Affects local holiday events.</span>
+          </div>
+          <select id="regionSelect" aria-label="Region">
+            <option>Worldwide</option>
+            <option>Europe</option>
+            <option>Americas</option>
+            <option>Asia</option>
+            <option>Africa</option>
+            <option>Oceania</option>
+          </select>
+        </div>
+      </section>
+
+      <!-- PREFERENCES -->
+      <section class="chalk-card settings-card reveal delay-4">
+        <h3>Preferences</h3>
+
+        <div class="settings-row">
+          <div class="label">
+            <span class="key">Chalk dust animation</span>
+            <span class="desc">Floating particles on the landing &amp; play pages.</span>
+          </div>
+          <label class="toggle">
+            <input id="prefDust" type="checkbox" checked />
+            <span class="track"></span>
+            <span class="thumb"></span>
+          </label>
+        </div>
+
+        <div class="settings-row">
+          <div class="label">
+            <span class="key">Reduced motion</span>
+            <span class="desc">Calmer transitions across the site.</span>
+          </div>
+          <label class="toggle">
+            <input id="prefMotion" type="checkbox" />
+            <span class="track"></span>
+            <span class="thumb"></span>
+          </label>
+        </div>
+
+        <div class="settings-row">
+          <div class="label">
+            <span class="key">Email me about updates</span>
+            <span class="desc">Patch notes &amp; tier launches.</span>
+          </div>
+          <label class="toggle">
+            <input id="prefMail" type="checkbox" />
+            <span class="track"></span>
+            <span class="thumb"></span>
+          </label>
+        </div>
+      </section>
+
+      <!-- DANGER -->
+      <section class="chalk-card settings-card reveal delay-1">
+        <h3>Reset</h3>
+        <p class="muted" style="margin: 0 0 8px; font-size: .95rem;">
+          Wipe local profile data: avatar, tier preview, preferences.
+        </p>
+        <div class="settings-row" style="flex-wrap: wrap; gap: 8px;">
+          <button id="resetAvatarOnly" class="btn" type="button">Reset avatar</button>
+          <button id="resetAll" class="btn" type="button" style="border-color:#e07a7a; color:#f1c0c0;">Reset everything</button>
+        </div>
+      </section>
+
+      <!-- ABOUT -->
+      <section class="chalk-card settings-card reveal delay-2">
+        <h3>About this build</h3>
+        <div class="settings-row">
+          <div class="label">
+            <span class="key">Version</span>
+            <span class="desc">Site build — v0.5-day3</span>
+          </div>
+        </div>
+        <div class="settings-row">
+          <div class="label">
+            <span class="key">Game app</span>
+            <span class="desc">app.heredita.net/app/</span>
+          </div>
+          <a class="btn btn-ghost" href="https://app.heredita.net/app/" rel="noopener">Open</a>
+        </div>
+        <div class="settings-row">
+          <div class="label">
+            <span class="key">Docs &amp; terms</span>
+            <span class="desc">Placeholder for now.</span>
+          </div>
+          <a class="btn btn-ghost" href="terms.html">Terms</a>
+        </div>
+      </section>
+
+    </div>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-links">
+        <a href="about.html">About Us</a>
+        <a href="terms.html">Terms &amp; Conditions</a>
+        <a href="updates.html">Updates</a>
+      </div>
+      <div class="footer-meta">© 2026 Heredita — <span class="muted">heredita.net</span></div>
+    </div>
+  </footer>
+
+  <script src="js/app.js"></script>
+  <script src="js/avatar.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const S = window.HereditaSession;
+
+      // ---- account info
+      function refreshAccount() {
+        const s = S.get();
+        const nameEl = document.getElementById('acctName');
+        const descEl = document.getElementById('acctDesc');
+        const signOut = document.getElementById('signOutBtn');
+        const signIn  = document.getElementById('signInBtn');
+        if (s && s.username) {
+          nameEl.textContent = s.username;
+          descEl.textContent = (s.tier === 'guest')
+            ? 'Guest profile — saved locally on this device.'
+            : 'Signed in as ' + (S.TIER_LABEL[S.getTier()]) + ' member.';
+          signOut.style.display = 'inline-flex';
+          signIn.textContent = 'Switch account';
+        } else {
+          nameEl.textContent = 'Signed out';
+          descEl.textContent = 'You\'re browsing without a profile.';
+          signOut.style.display = 'none';
+          signIn.textContent = 'Sign in';
+        }
+      }
+      refreshAccount();
+
+      document.getElementById('signOutBtn').addEventListener('click', () => {
+        S.clear();
+        localStorage.removeItem('heredita.avatar');
+        location.href = 'index.html';
+      });
+
+      // ---- tier switch
+      const tierBtns = document.querySelectorAll('.tier-switch button');
+      function refreshTierBtns() {
+        const t = S.getTier();
+        tierBtns.forEach(b => b.classList.toggle('active', b.dataset.tier === t));
+      }
+      refreshTierBtns();
+      tierBtns.forEach(b => b.addEventListener('click', () => {
+        S.setTier(b.dataset.tier);
+        S.renderUserChip();
+        refreshTierBtns();
+        refreshAccount();
+      }));
+
+      // ---- preferences (saved in localStorage)
+      const PREF_KEY = 'heredita.prefs';
+      function getPrefs() {
+        try { return Object.assign({ dust: true, motion: false, mail: false, lang: 'en', region: 'Worldwide' }, JSON.parse(localStorage.getItem(PREF_KEY) || '{}')); }
+        catch { return { dust: true, motion: false, mail: false, lang: 'en', region: 'Worldwide' }; }
+      }
+      function setPrefs(p) { localStorage.setItem(PREF_KEY, JSON.stringify(p)); }
+
+      const prefs = getPrefs();
+      document.getElementById('prefDust').checked   = prefs.dust;
+      document.getElementById('prefMotion').checked = prefs.motion;
+      document.getElementById('prefMail').checked   = prefs.mail;
+      document.getElementById('langSelect').value   = prefs.lang || 'en';
+      document.getElementById('regionSelect').value = prefs.region || 'Worldwide';
+
+      ['prefDust','prefMotion','prefMail'].forEach(id => {
+        document.getElementById(id).addEventListener('change', (e) => {
+          const p = getPrefs();
+          p[id.replace('pref','').toLowerCase()] = e.target.checked;
+          setPrefs(p);
+        });
+      });
+      document.getElementById('langSelect').addEventListener('change', (e) => {
+        const p = getPrefs(); p.lang = e.target.value; setPrefs(p);
+      });
+      document.getElementById('regionSelect').addEventListener('change', (e) => {
+        const p = getPrefs(); p.region = e.target.value; setPrefs(p);
+      });
+
+      // ---- resets
+      document.getElementById('resetAvatarOnly').addEventListener('click', () => {
+        localStorage.removeItem('heredita.avatar');
+        location.reload();
+      });
+      document.getElementById('resetAll').addEventListener('click', () => {
+        if (!confirm('Wipe all local Heredita data on this device?')) return;
+        localStorage.removeItem('heredita.session');
+        localStorage.removeItem('heredita.avatar');
+        localStorage.removeItem(PREF_KEY);
+        location.href = 'index.html';
+      });
+    });
+  </script>
+</body>
+</html>

@@ -17,6 +17,40 @@
   function setSession(s) { localStorage.setItem(SESSION_KEY, JSON.stringify(s)); }
   function clearSession() { localStorage.removeItem(SESSION_KEY); }
 
+  // ---- Tier helpers ----
+  const TIER_LABEL = { guest: 'Guest', regular: 'Regular', emperor: 'Emperor' };
+  function getTier() {
+    const s = getSession();
+    if (!s) return 'guest';
+    return s.tier || (s.guest ? 'guest' : 'regular');
+  }
+  function setTier(tier) {
+    const s = getSession() || { username: 'Guest' + Math.floor(Math.random() * 9000 + 1000), guest: true, coins: 0 };
+    s.tier = tier;
+    s.guest = (tier === 'guest');
+    setSession(s);
+  }
+  // expose for other modules (avatar.js, settings page)
+  window.HereditaSession = { get: getSession, set: setSession, clear: clearSession, getTier, setTier, TIER_LABEL };
+
+  // ---- Free-hat promo: Regular tier gets a tophat until 2026-08-28 ----
+  const FREE_HAT_DEADLINE = new Date('2026-08-28T23:59:59');
+  function applyFreeHatIfEligible() {
+    const tier = getTier();
+    if (tier !== 'regular') return;
+    if (new Date() > FREE_HAT_DEADLINE) return;
+    const s = getSession();
+    if (!s || s.freeHatClaimed) return;
+    try {
+      const av = JSON.parse(localStorage.getItem('heredita.avatar') || 'null');
+      const next = Object.assign({ country: 'poland', hat: 'tophat', eyes: 'default', mouth: 'smile', prop: 'none' }, av || {}, { hat: 'tophat' });
+      localStorage.setItem('heredita.avatar', JSON.stringify(next));
+      s.freeHatClaimed = true;
+      setSession(s);
+      setTimeout(() => toast('🎩 Free top hat unlocked — enjoy until Aug 28!'), 400);
+    } catch (_) {}
+  }
+
   function toast(msg, ms = 2200) {
     let el = $('.toast');
     if (!el) {
@@ -93,15 +127,28 @@
     if (bar && btn) {
       btn.addEventListener('click', () => bar.classList.toggle('mobile-open'));
     }
-    const chip = $('.user-chip .name');
-    const av   = $('.user-chip .avatar');
-    if (chip || av) {
-      const s = getSession();
-      const name = (s && s.username) ? s.username : 'Guest';
-      if (chip) chip.textContent = name;
-      if (av) av.textContent = name.charAt(0).toUpperCase();
-    }
+    renderUserChip();
   }
+
+  function renderUserChip() {
+    const s = getSession();
+    const tier = getTier();
+    const name = (s && s.username) ? s.username : 'Guest';
+
+    // legacy initial avatar
+    const av = $('.user-chip .avatar');
+    if (av && !av.classList.contains('countryball')) av.textContent = name.charAt(0).toUpperCase();
+
+    // new structure: .user-block with name + tier-badge
+    $$('.user-chip .name').forEach(el => { el.textContent = name; });
+    $$('.user-chip .tier-badge').forEach(el => {
+      el.setAttribute('data-tier', tier);
+      el.setAttribute('href', 'membership.html');
+      el.setAttribute('aria-label', 'Membership tier: ' + TIER_LABEL[tier]);
+      el.innerHTML = (tier === 'emperor' ? '<span class="crown" aria-hidden="true"></span>' : '') + TIER_LABEL[tier];
+    });
+  }
+  window.HereditaSession.renderUserChip = renderUserChip;
 
   // ---------- Play CTAs ----------
   // Anything tagged data-play sends the user to the real app.
@@ -187,7 +234,7 @@
         if (!dob) return toast('Please enter your date of birth.');
         if (pw.length < 6) return toast('Password must be 6+ characters.');
         if (pw !== pw2) return toast('Passwords do not match.');
-        setSession({ username, dob, guest: false, coins: 0 });
+        setSession({ username, dob, guest: false, tier: 'regular', coins: 0 });
         toast('Welcome to Heredita, ' + username + '!');
         setTimeout(() => location.href = 'home.html', 700);
       });
@@ -203,7 +250,7 @@
         const username = (fd.get('username') || '').toString().trim();
         const pw       = (fd.get('password') || '').toString();
         if (!username || !pw) return toast('Enter your credentials.');
-        setSession({ username, guest: false, coins: 0 });
+        setSession({ username, guest: false, tier: 'regular', coins: 0 });
         setTimeout(() => location.href = 'home.html', 400);
       });
     }
@@ -213,7 +260,7 @@
     if (guestBtn) {
       guestBtn.addEventListener('click', () => {
         if (!tos.checked) { toast('Please agree to the Terms first.'); return; }
-        setSession({ username: 'Guest' + Math.floor(Math.random() * 9000 + 1000), guest: true, coins: 0 });
+        setSession({ username: 'Guest' + Math.floor(Math.random() * 9000 + 1000), guest: true, tier: 'guest', coins: 0 });
         location.href = 'home.html';
       });
     }
@@ -321,6 +368,7 @@
 
   // ---------- init ----------
   document.addEventListener('DOMContentLoaded', () => {
+    applyFreeHatIfEligible();
     wireNavToggle();
     wirePlayCtas();
     wireAuthPage();

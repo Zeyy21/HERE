@@ -11,31 +11,41 @@
 
   <header class="topbar">
     <div class="inner">
-      <a class="brand" href="play.html" aria-label="Heredita — Play">
-        <img src="assets/heredita-icon.webp" alt="" />
-        <span class="brand-name">Heredita</span>
-      </a>
-      <button class="nav-toggle" aria-label="Toggle navigation">Menu</button>
-      <nav aria-label="Primary">
-        <a href="home.html" class="active">Home</a>
-        <a href="play.html">Play</a>
-        <a href="store.html">Store</a>
-        <a href="membership.html">Membership</a>
-        <a href="avatar.html">Avatar</a>
-        <a href="updates.html">Updates</a>
-        <a href="about.html">About</a>
-      </nav>
-      <div class="spacer"></div>
-      <div class="coin-chip" title="In-game currency — coming soon">
-        <span class="coin" aria-hidden="true"></span>
-        <span>0</span>
-        <span class="soon">coming soon</span>
+      <div class="topbar-left">
+        <a class="brand" href="play.html" aria-label="Heredita — Play">
+          <img src="assets/heredita-icon.webp" alt="" />
+          <span class="brand-name">Heredita</span>
+        </a>
+        <button class="nav-toggle" aria-label="Toggle navigation">Menu</button>
+        <nav aria-label="Primary">
+          <a href="home.html" class="active">Home</a>
+          <a href="play.html">Play</a>
+          <a href="store.html">Store</a>
+          <a href="avatar.html">Avatar</a>
+          <a href="updates.html">Updates</a>
+          <a href="about.html">About</a>
+        </nav>
       </div>
-      <div class="user-chip">
-        <span class="avatar">G</span>
-        <span class="name">Guest</span>
+      <div class="topbar-right">
+        <div class="coin-chip" title="In-game currency — coming soon">
+          <span class="coin" aria-hidden="true"></span>
+          <span>0</span>
+          <span class="soon">coming soon</span>
+        </div>
+        <div class="user-chip">
+          <span class="avatar">G</span>
+          <div class="user-block">
+            <span class="name">Guest</span>
+            <a href="membership.html" class="tier-badge" data-tier="guest">Guest</a>
+          </div>
+        </div>
+        <a class="btn-icon" href="settings.html" aria-label="Settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+        </a>
       </div>
-      <a id="logoutBtn" class="btn btn-ghost" href="index.html" title="Sign out">Exit</a>
     </div>
   </header>
 
