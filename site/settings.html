@@ -79,15 +79,17 @@
       <!-- TIER -->
       <section class="chalk-card settings-card reveal delay-2">
         <h3>Membership tier</h3>
-        <p class="muted" style="margin: 0 0 8px; font-size: .95rem;">
-          Preview a tier locally (real upgrades arrive with the Store).
+        <p class="muted" style="margin: 0 0 8px; font-size: .95rem;" id="tierExplain">
+          Your tier is tied to your account type.
         </p>
-        <div class="tier-switch" role="radiogroup" aria-label="Tier preview">
+        <div class="tier-switch" role="radiogroup" aria-label="Tier">
           <button type="button" data-tier="guest">Guest</button>
           <button type="button" data-tier="regular">Regular</button>
-          <button type="button" data-tier="emperor" class="locked" aria-disabled="true" title="Emperor unlocks with the paid release">Emperor</button>
+          <button type="button" data-tier="emperor">Emperor</button>
         </div>
-        <p class="muted" style="font-size: 0.9rem; margin: 4px 0 0;">🔒 Emperor is paywalled — placeholder for now.</p>
+        <p class="muted" style="font-size: 0.9rem; margin: 6px 0 0;" id="tierHint">
+          Sign up to become Regular. Emperor unlocks with the paid release.
+        </p>
         <div class="settings-row">
           <div class="label">
             <span class="key">Compare tiers</span>
@@ -260,17 +262,56 @@
 
       // ---- tier switch
       const tierBtns = document.querySelectorAll('.tier-switch button');
+      const tierHint = document.getElementById('tierHint');
+
+      const REASON_TEXT = {
+        'paid':          'Emperor unlocks with the paid release.',
+        'needs-signup':  'Sign up to become Regular.',
+        'needs-signout': 'Sign out to browse as a Guest.'
+      };
+
       function refreshTierBtns() {
-        const t = S.getTier();
+        const current = S.getTier();
         tierBtns.forEach(b => {
-          // never mark a locked button as active
-          const isActive = b.dataset.tier === t && !S.isTierLocked(b.dataset.tier);
+          const target = b.dataset.tier;
+          const isActive = target === current;
           b.classList.toggle('active', isActive);
+
+          if (isActive) {
+            // your current tier — clear lock styling
+            b.classList.remove('locked');
+            b.removeAttribute('aria-disabled');
+            b.title = 'Current tier';
+            return;
+          }
+          const verdict = S.canSwitchTier(target);
+          if (verdict.ok) {
+            b.classList.remove('locked');
+            b.removeAttribute('aria-disabled');
+            b.title = 'Switch to ' + target;
+          } else {
+            b.classList.add('locked');
+            b.setAttribute('aria-disabled', 'true');
+            b.title = REASON_TEXT[verdict.reason] || 'Locked';
+          }
         });
+
+        // Hint copy — show only the reasons for the currently-blocked options.
+        const reasons = Array.from(tierBtns)
+          .filter(b => b.dataset.tier !== current)
+          .map(b => S.canSwitchTier(b.dataset.tier))
+          .filter(v => !v.ok)
+          .map(v => REASON_TEXT[v.reason]);
+        // dedupe while preserving order
+        const uniq = Array.from(new Set(reasons));
+        tierHint.innerHTML = uniq.length
+          ? uniq.map(t => '🔒 ' + t).join('  ·  ')
+          : '✓ Free to switch.';
       }
       refreshTierBtns();
+
       tierBtns.forEach(b => b.addEventListener('click', () => {
-        // setTier returns false + opens paywall if tier is locked
+        // setTier handles its own modal if blocked
         const ok = S.setTier(b.dataset.tier);
         if (!ok) return;
         S.renderUserChip();

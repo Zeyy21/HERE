@@ -75,7 +75,7 @@
           <li class="muted-perk">No free seasonal items</li>
         </ul>
         <div class="tier-cta">
-          <button type="button" class="btn" data-tier-target="guest">Stay as Guest</button>
+          <button type="button" class="btn" data-tier-target="guest" data-tier-button>Stay as Guest</button>
         </div>
       </article>
 
@@ -95,7 +95,7 @@
           <li class="muted-perk">Sign-in bonus + lottery spin</li>
         </ul>
         <div class="tier-cta">
-          <button type="button" class="btn btn-primary" data-tier-target="regular">Become Regular</button>
+          <button type="button" class="btn btn-primary" data-tier-target="regular" data-tier-button>Become Regular</button>
         </div>
       </article>
 
@@ -165,15 +165,51 @@
   <script src="js/app.js"></script>
   <script src="js/avatar.js"></script>
   <script>
-    // Allow clicking the tier buttons on this page to switch tier locally.
-    // Emperor is paywalled — setTier returns false and opens the paywall modal.
+    // Tier buttons on this page route through setTier(), which handles all
+    // gating: Emperor → paywall modal, Guest↔Regular → tier-gate modal.
     document.addEventListener('DOMContentLoaded', () => {
-      document.querySelectorAll('[data-tier-target]').forEach(btn => {
+      const S = window.HereditaSession;
+      const buttons = document.querySelectorAll('[data-tier-target]');
+
+      function refresh() {
+        const current = S.getTier();
+        buttons.forEach(btn => {
+          const target = btn.dataset.tierTarget;
+          // Reset visuals
+          btn.classList.remove('locked', 'emperor-locked', 'current-tier');
+          btn.removeAttribute('aria-disabled');
+
+          if (target === current) {
+            btn.classList.add('current-tier');
+            btn.disabled = false;
+            btn.textContent = '✓ Your current tier';
+            btn.title = 'You\'re already on this tier';
+            return;
+          }
+          const verdict = S.canSwitchTier(target);
+          if (!verdict.ok) {
+            btn.classList.add(target === 'emperor' ? 'emperor-locked' : 'locked');
+            btn.setAttribute('aria-disabled', 'true');
+            // Tooltip explains why, button label keeps original intent
+            const tips = {
+              'paid': 'Unlocks with the paid release',
+              'needs-signup': 'Sign up from the landing page',
+              'needs-signout': 'Sign out from Settings'
+            };
+            btn.title = tips[verdict.reason] || 'Locked';
+          }
+        });
+      }
+      refresh();
+
+      buttons.forEach(btn => {
         btn.addEventListener('click', () => {
+          if (btn.classList.contains('current-tier')) return;
           const tier = btn.dataset.tierTarget;
-          const ok = window.HereditaSession.setTier(tier);
-          if (!ok) return; // paywall handled it
-          window.HereditaSession.renderUserChip();
+          const ok = S.setTier(tier);
+          if (!ok) return; // gate modal already opened
+          S.renderUserChip();
+          refresh();
           const t = document.createElement('div');
           t.className = 'toast show';
           t.textContent = '✓ Switched to ' + tier.charAt(0).toUpperCase() + tier.slice(1) + ' tier.';

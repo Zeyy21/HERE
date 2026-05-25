@@ -19,22 +19,57 @@
 
   // ---- Tier helpers ----
   const TIER_LABEL = { guest: 'Guest', regular: 'Regular', emperor: 'Emperor' };
-  // Emperor is paid — locked until paid release ships. Free tiers are self-switchable.
-  const FREE_TIERS = ['guest', 'regular'];
-  function isTierLocked(tier) { return !FREE_TIERS.includes(tier); }
+  // Emperor is paid — locked until paid release ships.
+  const PAID_TIERS = ['emperor'];
+  function isTierPaid(tier) { return PAID_TIERS.includes(tier); }
   function getTier() {
     const s = getSession();
     if (!s) return 'guest';
     return s.tier || (s.guest ? 'guest' : 'regular');
   }
-  // Returns true if applied, false if the tier is paywalled and we showed the modal instead.
+  // Why a tier change is allowed / blocked. Used by UI to render locks + messaging.
+  // Returns { ok: true } or { ok: false, reason: 'paid'|'needs-signup'|'needs-signout' }
+  function canSwitchTier(targetTier) {
+    const current = getTier();
+    if (targetTier === current) return { ok: true };
+    if (isTierPaid(targetTier)) return { ok: false, reason: 'paid' };
+    // Account-type gate: tier matches session origin.
+    // - Guest session → can only be Guest. Promote by signing up.
+    // - Regular session (signed in) → can only be Regular. Demote by signing out.
+    if (current === 'guest' && targetTier === 'regular')  return { ok: false, reason: 'needs-signup' };
+    if (current === 'regular' && targetTier === 'guest')  return { ok: false, reason: 'needs-signout' };
+    return { ok: true };
+  }
+
+  // Returns true if applied. Otherwise opens an explainer modal and returns false.
   function setTier(tier) {
-    if (isTierLocked(tier)) {
-      openPaywall({
-        title: 'Emperor — Locked',
-        body: 'Emperor opens with the paid release. We\'ll notify you the moment it ships.',
-        primaryLabel: '🔔 Notify me'
-      });
+    const verdict = canSwitchTier(tier);
+    if (!verdict.ok) {
+      if (verdict.reason === 'paid') {
+        openPaywall({
+          title: 'Emperor — Locked',
+          body: 'Emperor opens with the paid release. We\'ll notify you the moment it ships.',
+          primaryLabel: '🔔 Notify me'
+        });
+      } else if (verdict.reason === 'needs-signup') {
+        openTierGate({
+          title: 'Regular needs an account',
+          body: 'You\'re browsing as a Guest. Sign up to become a Regular member — that\'s how you unlock monthly Heredita Coins and the free seasonal hat.',
+          primaryLabel: 'Sign up',
+          primaryHref: 'index.html'
+        });
+      } else if (verdict.reason === 'needs-signout') {
+        openTierGate({
+          title: 'Signed in as Regular',
+          body: 'To browse as a Guest you need to sign out. Your saved profile stays safe — sign back in any time.',
+          primaryLabel: 'Sign out',
+          primaryAction: () => {
+            clearSession();
+            localStorage.removeItem('heredita.avatar');
+            location.href = 'index.html';
+          }
+        });
+      }
       return false;
     }
     const s = getSession() || { username: 'Guest' + Math.floor(Math.random() * 9000 + 1000), guest: true, coins: 0 };
@@ -42,6 +77,44 @@
     s.guest = (tier === 'guest');
     setSession(s);
     return true;
+  }
+
+  // Tier gate modal — same chalk-card shell as openPaywall, but with a key icon.
+  function openTierGate({ title, body, primaryLabel = 'OK', primaryHref, primaryAction } = {}) {
+    const modal = document.createElement('div');
+    modal.className = 'lightbox';
+    const primaryAttr = primaryHref ? `data-tier-go="${primaryHref}"` : 'data-tier-go="action"';
+    modal.innerHTML = `
+      <button class="close" aria-label="Close">✕</button>
+      <div class="chalk-card" style="max-width: 460px; padding: 32px 28px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 14px; pointer-events: auto; cursor: default;">
+        <svg viewBox="0 0 200 200" aria-hidden="true" style="width: 96px; height: auto; filter: drop-shadow(0 8px 18px rgba(0,0,0,0.5));">
+          <circle cx="78" cy="100" r="32" fill="none" stroke="rgba(244,241,230,0.92)" stroke-width="12"/>
+          <rect x="100" y="92" width="78" height="16" rx="2" fill="rgba(244,241,230,0.92)"/>
+          <rect x="150" y="108" width="10" height="20" fill="rgba(244,241,230,0.92)"/>
+          <rect x="170" y="108" width="10" height="14" fill="rgba(244,241,230,0.92)"/>
+          <circle cx="78" cy="100" r="8" fill="#0f2018"/>
+        </svg>
+        <h2 style="font-family:'Caveat',cursive; margin:0; font-size:2rem;">${title || 'Locked'}</h2>
+        <p style="margin:0; color: var(--chalk-soft); max-width: 38ch;">${body || ''}</p>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-top:6px;">
+          <button class="btn btn-primary" ${primaryAttr}>${primaryLabel}</button>
+          <button class="btn" data-tier-close>Cancel</button>
+        </div>
+      </div>
+    `;
+    const close = () => modal.remove();
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal || e.target.classList.contains('close') || e.target.hasAttribute('data-tier-close')) close();
+      if (e.target.hasAttribute('data-tier-go')) {
+        const go = e.target.getAttribute('data-tier-go');
+        if (go === 'action' && typeof primaryAction === 'function') { primaryAction(); }
+        else if (go && go !== 'action') { window.location.href = go; }
+      }
+    });
+    document.addEventListener('keydown', function onKey(e) {
+      if (e.key === 'Escape') { close(); document.removeEventListener('keydown', onKey); }
+    });
+    document.body.appendChild(modal);
   }
 
   // ---- Shared paywall modal ----
@@ -81,7 +154,13 @@
   }
 
   // expose for other modules (avatar.js, settings page, membership)
-  window.HereditaSession = { get: getSession, set: setSession, clear: clearSession, getTier, setTier, isTierLocked, openPaywall, TIER_LABEL };
+  window.HereditaSession = {
+    get: getSession, set: setSession, clear: clearSession,
+    getTier, setTier, canSwitchTier, isTierPaid,
+    openPaywall, openTierGate, TIER_LABEL
+  };
+  // Back-compat shim: anything still calling `isTierLocked` now means "paid".
+  window.HereditaSession.isTierLocked = isTierPaid;
 
   // ---- Free-hat promo: Regular tier gets a tophat until 2026-08-28 ----
   const FREE_HAT_DEADLINE = new Date('2026-08-28T23:59:59');
@@ -416,11 +495,11 @@
     goto(0);
   }
 
-  // ---- Sanitize any previously-stored locked tier ----
+  // ---- Sanitize any previously-stored paid tier ----
   // (e.g. someone set Emperor in localStorage before paywall existed)
   function sanitizeStoredTier() {
     const s = getSession();
-    if (s && isTierLocked(s.tier)) {
+    if (s && isTierPaid(s.tier)) {
       s.tier = s.guest ? 'guest' : 'regular';
       setSession(s);
     }
