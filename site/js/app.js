@@ -3,7 +3,21 @@
   'use strict';
 
   // External app URL — the real game lives here.
-  const PLAY_URL = 'https://app.heredita.net/app/';
+  // Mirror of HereditaAPI.PLAY_URL so app.js works even if api.js isn't loaded yet.
+  const PLAY_URL = (window.HereditaAPI && window.HereditaAPI.PLAY_URL) || 'https://app.heredita.net/app/';
+
+  // Build a play URL with a #token handoff so the game can auto-login.
+  // Uses URL hash (not query string) so the token never appears in Referer
+  // headers, server access logs, or browser history.
+  function buildPlayURL() {
+    const s = getSession();
+    if (!s || !s.token || s.guest) return PLAY_URL;
+    const hash = new URLSearchParams({
+      token: s.token,
+      username: s.username || ''
+    }).toString();
+    return PLAY_URL + '#' + hash;
+  }
 
   // ---------- helpers ----------
   const $  = (sel, root = document) => root.querySelector(sel);
@@ -280,27 +294,44 @@
   window.HereditaSession.renderUserChip = renderUserChip;
 
   // ---------- Play CTAs ----------
-  // Anything tagged data-play sends the user to the real app.
+  // Anything tagged data-play sends the user to the real app, with a #token
+  // handoff if they're signed in (so the game can auto-login).
   function wirePlayCtas() {
     $$('[data-play]').forEach(el => {
-      if (el.tagName === 'A') {
-        el.setAttribute('href', PLAY_URL);
-        el.setAttribute('rel', 'noopener');
+      // Always set href freshly on click — token may have changed since page load.
+      function refreshHref() {
+        const url = buildPlayURL();
+        if (el.tagName === 'A') {
+          el.setAttribute('href', url);
+          el.setAttribute('rel', 'noopener');
+        }
+        return url;
       }
+      refreshHref();
+
       el.addEventListener('click', (e) => {
+        const url = refreshHref();
         if (el.tagName !== 'A') e.preventDefault();
-        // brief loading flourish on the Play page only
+
+        // Brief loading flourish on the Play page only
         const ov = $('#loadingOverlay');
         if (ov) {
           ov.classList.add('show');
           const status = $('#loadingStatus');
-          const steps = [
-            'Sharpening chalk…',
-            'Loading 1936 borders…',
-            'Rolling the dice…',
-            'Painting Europe…',
-            'Handing you the brush…'
-          ];
+          const s = getSession();
+          const steps = (s && s.token && !s.guest)
+            ? [
+                'Sharpening chalk…',
+                'Verifying your token…',
+                'Painting Europe…',
+                'Handing you the brush…'
+              ]
+            : [
+                'Sharpening chalk…',
+                'Loading 1936 borders…',
+                'Rolling the dice…',
+                'Painting Europe…'
+              ];
           let i = 0;
           if (status) status.textContent = steps[0];
           const ticker = setInterval(() => {
@@ -309,11 +340,15 @@
           }, 600);
           setTimeout(() => {
             clearInterval(ticker);
-            window.location.href = PLAY_URL;
+            window.location.href = url;
           }, 1400);
-        } else {
-          window.location.href = PLAY_URL;
+          // Prevent default A navigation since we'll redirect ourselves after the delay
+          if (el.tagName === 'A') e.preventDefault();
+        } else if (el.tagName !== 'A') {
+          window.location.href = url;
         }
+        // If it's a plain <a> with no loading overlay, the browser's default
+        // navigation already uses the freshly-set href.
       });
     });
   }
@@ -348,10 +383,54 @@
     }
     if (tos) { tos.addEventListener('change', syncGate); syncGate(); }
 
-    // sign up
+    // helpers
+    const API = window.HereditaAPI;
+
+    async function persistLoginAndGo(username, token) {
+      // Pull rank from /users/me so we can store it. Best-effort — if it fails,
+      // we still keep the session (the token alone is enough for the game).
+      let rank = 'player', userId = null;
+      try {
+        const me = await API.getMe(token);
+        if (me.ok) { rank = me.user.rank || 'player'; userId = me.user.id; }
+      } catch (_) {}
+      setSession({
+        username,
+        token,
+        userId,
+        rank,
+        guest: false,
+        tier: 'regular',
+        coins: 0
+      });
+      renderUserChip();
+      toast('Welcome, ' + username + '!');
+      setTimeout(() => location.href = 'home.html', 500);
+    }
+
+    // Local-dev fallback when CORS blocks calls from localhost
+    function localMockLogin(username) {
+      setSession({ username, guest: false, tier: 'regular', coins: 0 });
+      toast('(local dev) Signed in without API — CORS blocks heredita.net only.');
+      setTimeout(() => location.href = 'home.html', 700);
+    }
+
+    function setBusy(btn, busy, busyText) {
+      if (!btn) return;
+      if (busy) {
+        btn._origLabel = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = busyText || 'Working…';
+      } else {
+        btn.disabled = false;
+        if (btn._origLabel) btn.textContent = btn._origLabel;
+      }
+    }
+
+    // ---- sign up ----
     const signupForm = $('#signupForm');
     if (signupForm) {
-      signupForm.addEventListener('submit', (e) => {
+      signupForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         if (!tos.checked) { toast('Please agree to the Terms first.'); return; }
         const fd = new FormData(signupForm);
@@ -360,36 +439,64 @@
         const pw       = (fd.get('password') || '').toString();
         const pw2      = (fd.get('confirm') || '').toString();
         if (username.length < 3) return toast('Username must be 3+ characters.');
-        if (!dob) return toast('Please enter your date of birth.');
-        if (pw.length < 6) return toast('Password must be 6+ characters.');
-        if (pw !== pw2) return toast('Passwords do not match.');
-        setSession({ username, dob, guest: false, tier: 'regular', coins: 0 });
-        toast('Welcome to Heredita, ' + username + '!');
-        setTimeout(() => location.href = 'home.html', 700);
+        if (!dob)              return toast('Please enter your date of birth.');
+        if (pw.length < 6)     return toast('Password must be 6+ characters.');
+        if (pw !== pw2)        return toast('Passwords do not match.');
+
+        const btn = signupForm.querySelector('button[type="submit"]');
+        setBusy(btn, true, 'Creating account…');
+
+        const reg = await API.register(username, pw);
+        if (!reg.ok) {
+          if (reg.error === 'cors') { localMockLogin(username); return; }
+          setBusy(btn, false);
+          return toast(reg.error === 'taken' ? 'Username is already taken.' : reg.message);
+        }
+        // Auto-login right after registering.
+        const lg = await API.login(username, pw);
+        if (!lg.ok) {
+          setBusy(btn, false);
+          return toast('Account created but auto sign-in failed: ' + lg.message);
+        }
+        await persistLoginAndGo(username, lg.token);
       });
     }
 
-    // sign in
+    // ---- sign in ----
     const signinForm = $('#signinForm');
     if (signinForm) {
-      signinForm.addEventListener('submit', (e) => {
+      signinForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         if (!tos.checked) { toast('Please agree to the Terms first.'); return; }
         const fd = new FormData(signinForm);
         const username = (fd.get('username') || '').toString().trim();
         const pw       = (fd.get('password') || '').toString();
         if (!username || !pw) return toast('Enter your credentials.');
-        setSession({ username, guest: false, tier: 'regular', coins: 0 });
-        setTimeout(() => location.href = 'home.html', 400);
+
+        const btn = signinForm.querySelector('button[type="submit"]');
+        setBusy(btn, true, 'Signing in…');
+
+        const lg = await API.login(username, pw);
+        if (!lg.ok) {
+          if (lg.error === 'cors') { localMockLogin(username); return; }
+          setBusy(btn, false);
+          return toast(lg.message);
+        }
+        await persistLoginAndGo(username, lg.token);
       });
     }
 
-    // guest
+    // ---- guest ----
     const guestBtn = $('#guestBtn');
     if (guestBtn) {
       guestBtn.addEventListener('click', () => {
         if (!tos.checked) { toast('Please agree to the Terms first.'); return; }
-        setSession({ username: 'Guest' + Math.floor(Math.random() * 9000 + 1000), guest: true, tier: 'guest', coins: 0 });
+        setSession({
+          username: 'Guest' + Math.floor(Math.random() * 9000 + 1000),
+          guest: true,
+          tier: 'guest',
+          coins: 0
+        });
         location.href = 'home.html';
       });
     }
@@ -505,11 +612,30 @@
     }
   }
 
+  // ---- Verify stored token is still valid on the API.
+  // Async, non-blocking. If invalid, clear the session and rerender the chip.
+  async function verifyStoredToken() {
+    const API = window.HereditaAPI;
+    if (!API) return;
+    const s = getSession();
+    if (!s || !s.token || !s.username) return;
+    const v = await API.verifyTokenId(s.username, s.token);
+    if (v.ok) return;
+    if (v.error === 'cors' || v.error === 'network') return; // don't punish offline
+    // Token is gone — wipe credentials but keep username for UX.
+    const cleaned = { username: s.username, guest: true, tier: 'guest', coins: 0 };
+    setSession(cleaned);
+    renderUserChip();
+    toast('Your session expired — please sign in again.');
+  }
+
   // ---------- init ----------
   document.addEventListener('DOMContentLoaded', () => {
     sanitizeStoredTier();
     applyFreeHatIfEligible();
     wireNavToggle();
+    // fire-and-forget; the page renders immediately, this just cleans stale tokens
+    verifyStoredToken();
     wirePlayCtas();
     wireAuthPage();
     wireHomePage();
