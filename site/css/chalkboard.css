@@ -1784,6 +1784,29 @@ a.chalk-card:active,
 }
 
 /* ============================================================
+   LOCK PILL — small inline 🔒 badge for section titles
+   ============================================================ */
+.lock-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  vertical-align: middle;
+  font-family: 'Caveat', cursive;
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 2px 12px;
+  margin-left: 8px;
+  border-radius: 999px;
+  background: rgba(217,122,61,0.18);
+  border: 1.5px dashed var(--accent);
+  color: var(--accent-soft);
+  letter-spacing: 0.3px;
+  line-height: 1.3;
+  text-shadow: none;
+  white-space: nowrap;
+}
+
+/* ============================================================
    LOCK OVERLAY — placeholder paywall / coming-soon gate
    Wrap any block in <div class="lock-wrap"> + add a child
    <div class="lock-overlay">…</div> as a sibling AFTER the content.
