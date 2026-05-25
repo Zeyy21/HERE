@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Heredita — Membership</title>
+  <link rel="icon" href="assets/heredita-icon.webp" type="image/webp" />
+  <link rel="stylesheet" href="css/chalkboard.css" />
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="inner">
+      <a class="brand" href="play.html" aria-label="Heredita — Play">
+        <img src="assets/heredita-icon.webp" alt="" />
+        <span class="brand-name">Heredita</span>
+      </a>
+      <button class="nav-toggle" aria-label="Toggle navigation">Menu</button>
+      <nav aria-label="Primary">
+        <a href="home.html">Home</a>
+        <a href="play.html">Play</a>
+        <a href="store.html">Store</a>
+        <a href="membership.html" class="active">Membership</a>
+        <a href="avatar.html">Avatar</a>
+        <a href="updates.html">Updates</a>
+        <a href="about.html">About</a>
+      </nav>
+      <div class="spacer"></div>
+      <div class="coin-chip" title="In-game currency — coming soon">
+        <span class="coin" aria-hidden="true"></span>
+        <span>0</span>
+        <span class="soon">coming soon</span>
+      </div>
+      <div class="user-chip">
+        <span class="avatar">G</span>
+        <span class="name">Guest</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" style="padding-top: 22px;">
+
+    <section class="text-center reveal" style="padding: 20px 12px 4px;">
+      <h1 class="tilt-l" style="font-size: clamp(2.4rem, 5vw, 3.6rem); margin-bottom: 4px;">Membership</h1>
+      <p class="muted" style="max-width: 580px; margin: 0 auto;">
+        Three tiers. Pricing &amp; perks finalized before launch — pick the one that sounds like you and we'll let you know when it opens.
+      </p>
+    </section>
+
+    <div class="tier-grid">
+
+      <!-- CADET -->
+      <article class="chalk-card tier-card reveal delay-1">
+        <h3 class="tier-name">Cadet</h3>
+        <p class="tier-tagline">For everyone. Forever.</p>
+        <p class="tier-price">Free <small>always free</small></p>
+        <ul>
+          <li>Sandbox &amp; Alternate History modes</li>
+          <li>All 30 modern countryballs</li>
+          <li>Basic brushes &amp; dice</li>
+          <li>Up to 3 saved timelines</li>
+          <li class="muted-perk">Custom map themes</li>
+          <li class="muted-perk">Server hosting</li>
+        </ul>
+        <div class="tier-cta">
+          <button type="button" class="btn" disabled aria-disabled="true">✓ You're here</button>
+        </div>
+      </article>
+
+      <!-- STATESMAN (featured) -->
+      <article class="chalk-card tier-card featured reveal delay-2">
+        <span class="ribbon">Most popular</span>
+        <h3 class="tier-name">Statesman</h3>
+        <p class="tier-tagline">Built for active roleplayers.</p>
+        <p class="tier-price">Pricing TBA <small>coming this year</small></p>
+        <ul>
+          <li>Everything in Cadet</li>
+          <li>All 12 alt-history flags</li>
+          <li>Hats, eyewear &amp; emotes</li>
+          <li>Unlimited saved timelines</li>
+          <li>Aged Parchment + Blueprint map themes</li>
+          <li>Monthly Heredita Coins drop</li>
+          <li class="muted-perk">Private community servers</li>
+        </ul>
+        <div class="tier-cta">
+          <button type="button" class="btn btn-primary" onclick="alert('We will email you the moment Statesman opens.');">🔔 Notify me</button>
+        </div>
+      </article>
+
+      <!-- EMPEROR -->
+      <article class="chalk-card tier-card reveal delay-3">
+        <h3 class="tier-name">Emperor</h3>
+        <p class="tier-tagline">Run your own corner of the timeline.</p>
+        <p class="tier-price">Pricing TBA <small>coming this year</small></p>
+        <ul>
+          <li>Everything in Statesman</li>
+          <li>Host private community servers</li>
+          <li>Custom rulesets &amp; mod tools</li>
+          <li>Bigger monthly Coins drop</li>
+          <li>Title banners &amp; rare frames</li>
+          <li>Early access to new features</li>
+          <li>"Emperor" chat tag</li>
+        </ul>
+        <div class="tier-cta">
+          <button type="button" class="btn" onclick="alert('We will email you the moment Emperor opens.');">🔔 Notify me</button>
+        </div>
+      </article>
+
+    </div>
+
+    <p class="muted text-center reveal" style="margin-top: 22px;">
+      Nothing on this page is final. Tier names, perks and prices may change before launch.
+    </p>
+
+    <!-- FAQ -->
+    <div class="section-title reveal" style="margin-top: 36px;">
+      <h2 class="tilt-r">FAQ</h2>
+      <span class="muted">questions we keep getting</span>
+    </div>
+    <div class="faq-grid">
+      <div class="chalk-card reveal">
+        <h3>Is Heredita ever paywalled?</h3>
+        <p>No. The core sandbox + alt-history modes stay free forever. Paid tiers add cosmetic + community-hosting tools, not gameplay-defining stuff.</p>
+      </div>
+      <div class="chalk-card reveal">
+        <h3>When does pricing get announced?</h3>
+        <p>Same week we open the Store. Watch the <a href="updates.html">Updates</a> page or hit "Notify me" above and we'll email you.</p>
+      </div>
+      <div class="chalk-card reveal">
+        <h3>Can I switch tiers later?</h3>
+        <p>Yes — upgrade, downgrade or cancel any time. Anything you've already earned (avatars, titles, coins) stays in your account.</p>
+      </div>
+      <div class="chalk-card reveal">
+        <h3>What are Heredita Coins for?</h3>
+        <p>The in-game currency for <a href="store.html">Store</a> items — flags, hats, brushes, map themes. Coins are also earnable in-game, not pay-only.</p>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-links">
+        <a href="about.html">About Us</a>
+        <a href="terms.html">Terms &amp; Conditions</a>
+        <a href="updates.html">Updates</a>
+      </div>
+      <div class="footer-meta">© 2026 Heredita — <span class="muted">heredita.net</span></div>
+    </div>
+  </footer>
+
+  <script src="js/app.js"></script>
+  <script src="js/avatar.js"></script>
+</body>
+</html>

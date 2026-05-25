@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Heredita — Avatar</title>
+  <link rel="icon" href="assets/heredita-icon.webp" type="image/webp" />
+  <link rel="stylesheet" href="css/chalkboard.css" />
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="inner">
+      <a class="brand" href="play.html" aria-label="Heredita — Play">
+        <img src="assets/heredita-icon.webp" alt="" />
+        <span class="brand-name">Heredita</span>
+      </a>
+      <button class="nav-toggle" aria-label="Toggle navigation">Menu</button>
+      <nav aria-label="Primary">
+        <a href="home.html">Home</a>
+        <a href="play.html">Play</a>
+        <a href="store.html">Store</a>
+        <a href="membership.html">Membership</a>
+        <a href="avatar.html" class="active">Avatar</a>
+        <a href="updates.html">Updates</a>
+        <a href="about.html">About</a>
+      </nav>
+      <div class="spacer"></div>
+      <div class="coin-chip" title="In-game currency — coming soon">
+        <span class="coin" aria-hidden="true"></span>
+        <span>0</span>
+        <span class="soon">coming soon</span>
+      </div>
+      <div class="user-chip">
+        <span class="avatar">G</span>
+        <span class="name">Guest</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" style="padding-top: 22px;">
+
+    <div class="section-title reveal">
+      <h1 class="tilt-l">Avatar Customizer</h1>
+      <span class="muted">pick your countryball</span>
+    </div>
+
+    <section id="avatarRoot" class="avatar-layout">
+
+      <!-- COLUMN A: country picker -->
+      <aside class="chalk-card avatar-col reveal delay-1">
+        <h3>Country</h3>
+        <input id="countrySearch" type="search" class="country-search" placeholder="Search countries…" aria-label="Search countries" />
+        <div class="country-tabs" role="tablist" aria-label="Country category">
+          <button type="button" data-tab="modern" class="active">Modern</button>
+          <button type="button" data-tab="alt">Alt-History</button>
+        </div>
+        <div id="countryGrid" class="country-grid" role="listbox" aria-label="Countries"></div>
+      </aside>
+
+      <!-- COLUMN B: live preview -->
+      <section class="chalk-card avatar-col avatar-preview reveal delay-2">
+        <h2 id="previewName" class="country-name">—</h2>
+        <div id="previewStage" class="avatar-stage" aria-live="polite"></div>
+        <div class="avatar-actions">
+          <button id="saveAvatar" type="button" class="btn btn-primary">💾 Save Avatar</button>
+          <button id="randomAvatar" type="button" class="btn">🎲 Randomize</button>
+          <a id="resetAvatar" href="#" class="muted" style="align-self:center;">reset</a>
+        </div>
+        <p class="muted" style="font-size:.95rem; max-width: 36ch;">
+          Your countryball appears in the top-right of every page across Heredita.
+        </p>
+      </section>
+
+      <!-- COLUMN C: accessories -->
+      <aside class="chalk-card avatar-col reveal delay-3">
+        <h3>Accessories</h3>
+
+        <div class="acc-section">
+          <h4>Hat</h4>
+          <div id="acc-hat" class="acc-grid"></div>
+        </div>
+        <div class="acc-section">
+          <h4>Eyes</h4>
+          <div id="acc-eyes" class="acc-grid"></div>
+        </div>
+        <div class="acc-section">
+          <h4>Mouth</h4>
+          <div id="acc-mouth" class="acc-grid"></div>
+        </div>
+        <div class="acc-section">
+          <h4>Prop</h4>
+          <div id="acc-prop" class="acc-grid"></div>
+        </div>
+      </aside>
+
+    </section>
+
+    <p class="muted text-center reveal" style="margin: 24px 0 6px;">
+      More flags, hats and props arriving in the <a href="store.html">Store</a> soon.
+    </p>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-links">
+        <a href="about.html">About Us</a>
+        <a href="terms.html">Terms &amp; Conditions</a>
+        <a href="updates.html">Updates</a>
+      </div>
+      <div class="footer-meta">© 2026 Heredita — <span class="muted">heredita.net</span></div>
+    </div>
+  </footer>
+
+  <script src="js/app.js"></script>
+  <script src="js/avatar.js"></script>
+</body>
+</html>
