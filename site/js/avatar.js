@@ -228,6 +228,12 @@
     'yugoslavia','ussr','ottoman','persian','kingdomitaly','texas'
   ];
 
+  // ----- Placeholder lock: only these are selectable until launch -----
+  const UNLOCKED_COUNTRY = 'poland';
+  const UNLOCKED_ACCESSORY = { hat: 'none', eyes: 'default', mouth: 'none', prop: 'none' };
+  function isCountryLocked(id) { return id !== UNLOCKED_COUNTRY; }
+  function isAccessoryLocked(kind, key) { return key !== UNLOCKED_ACCESSORY[kind]; }
+
   // ============================================================
   // ACCESSORIES — each is inner SVG drawn over a 200x200 ball viewBox
   // The countryball circle sits at cx=100 cy=110 r=80 in that viewBox.
@@ -318,16 +324,27 @@
   // ============================================================
   // Storage
   // ============================================================
-  const DEFAULT_AVATAR = { country: 'poland', hat: 'none', eyes: 'default', mouth: 'smile', prop: 'none' };
+  // While the customizer is locked, the only valid avatar is Poland + no accessories.
+  const DEFAULT_AVATAR = Object.assign({ country: UNLOCKED_COUNTRY }, UNLOCKED_ACCESSORY);
+
+  function sanitizeToUnlocked(a) {
+    return {
+      country: isCountryLocked(a.country) ? UNLOCKED_COUNTRY : a.country,
+      hat:     isAccessoryLocked('hat',   a.hat)   ? UNLOCKED_ACCESSORY.hat   : a.hat,
+      eyes:    isAccessoryLocked('eyes',  a.eyes)  ? UNLOCKED_ACCESSORY.eyes  : a.eyes,
+      mouth:   isAccessoryLocked('mouth', a.mouth) ? UNLOCKED_ACCESSORY.mouth : a.mouth,
+      prop:    isAccessoryLocked('prop',  a.prop)  ? UNLOCKED_ACCESSORY.prop  : a.prop
+    };
+  }
 
   function getAvatar() {
     try {
       const v = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
       if (!v || !FLAGS[v.country]) return null;
-      return Object.assign({}, DEFAULT_AVATAR, v);
+      return sanitizeToUnlocked(Object.assign({}, DEFAULT_AVATAR, v));
     } catch { return null; }
   }
-  function saveAvatar(a) { localStorage.setItem(STORAGE_KEY, JSON.stringify(a)); }
+  function saveAvatar(a) { localStorage.setItem(STORAGE_KEY, JSON.stringify(sanitizeToUnlocked(a))); }
   function clearAvatar() { localStorage.removeItem(STORAGE_KEY); }
 
   // ============================================================
@@ -433,14 +450,25 @@
 
     function renderCountries() {
       const grid = $('#countryGrid', root);
-      grid.innerHTML = visibleIds().map(id => `
-        <button type="button" class="country-chip ${id === state.country ? 'active' : ''}" data-country="${id}" title="${FLAGS[id].name}">
-          ${buildFlagPreviewSVG(id, { size: 56 })}
-          <span class="name">${FLAGS[id].name}</span>
-        </button>
-      `).join('') || `<p class="muted" style="grid-column:1/-1; text-align:center; padding:14px;">No countries match "${search}".</p>`;
+      grid.innerHTML = visibleIds().map(id => {
+        const locked = isCountryLocked(id);
+        const cls = ['country-chip'];
+        if (id === state.country) cls.push('active');
+        if (locked) cls.push('locked');
+        const tip = locked ? 'Locked — coming soon' : FLAGS[id].name;
+        return `
+          <button type="button" class="${cls.join(' ')}" data-country="${id}" title="${tip}" ${locked ? 'aria-disabled="true"' : ''}>
+            ${buildFlagPreviewSVG(id, { size: 56 })}
+            <span class="name">${FLAGS[id].name}${locked ? ' 🔒' : ''}</span>
+          </button>
+        `;
+      }).join('') || `<p class="muted" style="grid-column:1/-1; text-align:center; padding:14px;">No countries match "${search}".</p>`;
       $$('.country-chip', grid).forEach(b => {
         b.addEventListener('click', () => {
+          if (b.classList.contains('locked')) {
+            flashLockMsg('That country is locked — coming soon.');
+            return;
+          }
           state.country = b.dataset.country;
           renderAll();
         });
@@ -451,21 +479,40 @@
       const wrap = $(`#acc-${kind}`, root);
       const entries = Object.entries(ACCESSORIES[kind]);
       wrap.innerHTML = entries.map(([key, val]) => {
+        const locked = isAccessoryLocked(kind, key);
+        const cls = ['acc-tile'];
+        if (state[kind] === key) cls.push('active');
+        if (locked) cls.push('locked');
         const inner = val.glyph
           ? `<svg viewBox="0 0 200 200" aria-hidden="true">${val.glyph}</svg>`
           : `<span class="none-x">∅</span>`;
+        const tip = locked ? `${val.label} — coming soon` : val.label;
         return `
-          <button type="button" class="acc-tile ${state[kind] === key ? 'active' : ''}" data-kind="${kind}" data-key="${key}" title="${val.label}">
+          <button type="button" class="${cls.join(' ')}" data-kind="${kind}" data-key="${key}" title="${tip}" ${locked ? 'aria-disabled="true"' : ''}>
             ${inner}
+            ${locked ? '<span class="acc-lock" aria-hidden="true">🔒</span>' : ''}
           </button>
         `;
       }).join('');
       $$('.acc-tile', wrap).forEach(t => {
         t.addEventListener('click', () => {
+          if (t.classList.contains('locked')) {
+            flashLockMsg('That accessory is locked — coming soon.');
+            return;
+          }
           state[t.dataset.kind] = t.dataset.key;
           renderAll();
         });
       });
+    }
+
+    function flashLockMsg(msg) {
+      let t = document.querySelector('.toast');
+      if (!t) { t = document.createElement('div'); t.className = 'toast'; document.body.appendChild(t); }
+      t.textContent = '🔒 ' + msg;
+      t.classList.add('show');
+      clearTimeout(t._lockT);
+      t._lockT = setTimeout(() => t.classList.remove('show'), 1800);
     }
 
     function renderPreview() {
@@ -515,15 +562,8 @@
     });
 
     $('#randomAvatar', root).addEventListener('click', () => {
-      const pool = tab === 'modern' ? MODERN_IDS : ALT_IDS;
-      state = {
-        country: pool[Math.floor(Math.random() * pool.length)],
-        hat:   pickRandom(ACCESSORIES.hat),
-        eyes:  pickRandom(ACCESSORIES.eyes),
-        mouth: pickRandom(ACCESSORIES.mouth),
-        prop:  pickRandom(ACCESSORIES.prop)
-      };
-      renderAll();
+      // Only one legal combo exists right now — randomize politely no-ops.
+      flashLockMsg('Randomize unlocks with the rest of the customizer.');
     });
 
     $('#resetAvatar', root).addEventListener('click', (e) => {

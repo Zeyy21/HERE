@@ -173,43 +173,6 @@
         </div>
       </section>
 
-      <!-- DANGER -->
-      <section class="chalk-card settings-card reveal delay-1">
-        <h3>Reset</h3>
-        <p class="muted" style="margin: 0 0 8px; font-size: .95rem;">
-          Wipe local profile data: avatar, tier preview, preferences.
-        </p>
-        <div class="settings-row" style="flex-wrap: wrap; gap: 8px;">
-          <button id="resetAvatarOnly" class="btn" type="button">Reset avatar</button>
-          <button id="resetAll" class="btn" type="button" style="border-color:#e07a7a; color:#f1c0c0;">Reset everything</button>
-        </div>
-      </section>
-
-      <!-- ABOUT -->
-      <section class="chalk-card settings-card reveal delay-2">
-        <h3>About this build</h3>
-        <div class="settings-row">
-          <div class="label">
-            <span class="key">Version</span>
-            <span class="desc">Site build — v0.5-day3</span>
-          </div>
-        </div>
-        <div class="settings-row">
-          <div class="label">
-            <span class="key">Game app</span>
-            <span class="desc">app.heredita.net/app/</span>
-          </div>
-          <a class="btn btn-ghost" href="https://app.heredita.net/app/" rel="noopener">Open</a>
-        </div>
-        <div class="settings-row">
-          <div class="label">
-            <span class="key">Docs &amp; terms</span>
-            <span class="desc">Placeholder for now.</span>
-          </div>
-          <a class="btn btn-ghost" href="terms.html">Terms</a>
-        </div>
-      </section>
-
     </div>
 
   </main>
@@ -348,18 +311,6 @@
         const p = getPrefs(); p.region = e.target.value; setPrefs(p);
       });
 
-      // ---- resets
-      document.getElementById('resetAvatarOnly').addEventListener('click', () => {
-        localStorage.removeItem('heredita.avatar');
-        location.reload();
-      });
-      document.getElementById('resetAll').addEventListener('click', () => {
-        if (!confirm('Wipe all local Heredita data on this device?')) return;
-        localStorage.removeItem('heredita.session');
-        localStorage.removeItem('heredita.avatar');
-        localStorage.removeItem(PREF_KEY);
-        location.href = 'index.html';
-      });
     });
   </script>
 </body>
