@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Heredita — Home</title>
+  <link rel="icon" href="assets/heredita-icon.webp" type="image/webp" />
+  <link rel="stylesheet" href="css/chalkboard.css" />
+</head>
+<body class="home-page">
+
+  <header class="topbar">
+    <div class="inner">
+      <a class="brand" href="play.html" aria-label="Heredita — Play">
+        <img src="assets/heredita-icon.webp" alt="" />
+        <span class="brand-name">Heredita</span>
+      </a>
+      <button class="nav-toggle" aria-label="Toggle navigation">Menu</button>
+      <nav aria-label="Primary">
+        <a href="home.html" class="active">Home</a>
+        <a href="play.html">Play</a>
+        <a href="updates.html">Updates</a>
+        <a href="about.html">About</a>
+      </nav>
+      <div class="spacer"></div>
+      <div class="coin-chip" title="In-game currency — coming soon">
+        <span class="coin" aria-hidden="true"></span>
+        <span>0</span>
+        <span class="soon">coming soon</span>
+      </div>
+      <div class="user-chip">
+        <span class="avatar">G</span>
+        <span class="name">Guest</span>
+      </div>
+      <a id="logoutBtn" class="btn btn-ghost" href="index.html" title="Sign out">Exit</a>
+    </div>
+  </header>
+
+  <main class="container" style="padding-top: 22px;">
+
+    <!-- Hero -->
+    <section class="chalk-card hero-card reveal" aria-labelledby="heroTitle">
+      <div class="hero-text">
+        <h1 id="heroTitle" class="tilt-l">Welcome back, <span class="accent" id="welcomeName">Guest</span>.</h1>
+        <p>Your timeline is paused at <strong>December 3rd, 1945</strong>. Pick up the chalk and keep painting.</p>
+        <div class="row" style="margin-top: 14px;">
+          <a href="https://app.heredita.net/app/" data-play class="btn btn-primary">▶ Continue Playing</a>
+          <a class="btn btn-ghost" href="updates.html">What's new</a>
+        </div>
+      </div>
+      <a href="https://app.heredita.net/app/" data-play class="hero-art" role="img" aria-label="Open the Heredita app"></a>
+    </section>
+
+    <!-- Modes -->
+    <div class="section-title reveal">
+      <h2 class="tilt-r">Game Modes</h2>
+      <span class="muted">pick a path</span>
+    </div>
+    <div class="mode-grid">
+      <a class="chalk-card mode-card reveal delay-1" href="https://app.heredita.net/app/" data-play>
+        <span class="tag">Sandbox</span>
+        <h3>Free Paint</h3>
+        <p>Solo on the map. No dice, no chat — just chalk, borders, and ideas.</p>
+      </a>
+      <a class="chalk-card mode-card reveal delay-2" href="https://app.heredita.net/app/" data-play>
+        <span class="tag">Roleplay</span>
+        <h3>Alternate History</h3>
+        <p>Pick a year, change one event, and watch the cascade.</p>
+      </a>
+      <div class="chalk-card mode-card disabled reveal delay-3" aria-disabled="true">
+        <span class="tag">Soon™</span>
+        <h3>Multiplayer Servers</h3>
+        <p>Join other historians. Dice rolls, treaties, betrayals. Coming soon.</p>
+      </div>
+      <div class="chalk-card mode-card disabled reveal delay-4" aria-disabled="true">
+        <span class="tag">Soon™</span>
+        <h3>Community Worlds</h3>
+        <p>Custom rulesets shared by players. Coming soon.</p>
+      </div>
+    </div>
+
+    <!-- Updates strip -->
+    <div class="section-title reveal">
+      <h2 class="tilt-l">Latest Update</h2>
+      <a class="see-all" href="updates.html">see all →</a>
+    </div>
+    <a href="updates.html" class="chalk-card updates-strip reveal" style="text-decoration:none;">
+      <span class="label">v0.4 — Hilmi's Map Pack</span>
+      <span class="muted">new loading screens, brush balancing, dice tweaks</span>
+      <span class="spacer"></span>
+      <span class="btn btn-ghost">Read notes →</span>
+    </a>
+
+    <!-- Preview footage showcase -->
+    <div class="section-title reveal">
+      <h2 class="tilt-r">Preview Footage</h2>
+      <span class="muted">5 builds in rotation · click to expand</span>
+    </div>
+
+    <section id="previewShowcase" class="chalk-card preview-showcase reveal" tabindex="0" aria-label="Preview footage carousel">
+      <div class="preview-stage" aria-live="polite">
+        <div class="slide active"
+             style="background-image:url('assets/screenshot-1945.png')"
+             data-full="assets/screenshot-1945.png"></div>
+        <div class="slide"
+             style="background-image:url('assets/screenshot-front.png')"
+             data-full="assets/screenshot-front.png"></div>
+        <div class="slide"
+             style="background-image:url('assets/screenshot-poland-chat.png')"
+             data-full="assets/screenshot-poland-chat.png"></div>
+        <div class="slide"
+             style="background-image:url('assets/screenshot-tools.png')"
+             data-full="assets/screenshot-tools.png"></div>
+        <div class="slide"
+             style="background-image:url('assets/screenshot-map.png')"
+             data-full="assets/screenshot-map.png"></div>
+
+        <span class="tag-live">● Pre-Alpha</span>
+        <button class="stage-nav prev" aria-label="Previous slide">‹</button>
+        <button class="stage-nav next" aria-label="Next slide">›</button>
+
+        <div class="stage-overlay">
+          <p class="caption">December 3rd, 1945 — Europe in flux</p>
+          <p class="sub">Players: Whirling, CountDookuEnjoyer, fish</p>
+        </div>
+
+        <div class="preview-progress"><div class="bar"></div></div>
+      </div>
+
+      <div class="preview-thumbs" role="tablist" aria-label="Footage chapters">
+        <div class="thumb active" style="background-image:url('assets/screenshot-1945.png')"
+             data-caption="December 3rd, 1945 — Europe in flux"
+             data-sub="Players: Whirling, CountDookuEnjoyer, fish">
+          <span class="label">1945 — Postwar map</span>
+        </div>
+        <div class="thumb" style="background-image:url('assets/screenshot-front.png')"
+             data-caption="The Front — Poland holds the line"
+             data-sub="Hatched red shows contested territory">
+          <span class="label">Contested fronts</span>
+        </div>
+        <div class="thumb" style="background-image:url('assets/screenshot-poland-chat.png')"
+             data-caption="1938 — Chat & diplomacy"
+             data-sub="Players negotiate before annexation">
+          <span class="label">Chat & diplomacy</span>
+        </div>
+        <div class="thumb" style="background-image:url('assets/screenshot-tools.png')"
+             data-caption="Brush tools & palette"
+             data-sub="Paint borders, found cities, restore nations">
+          <span class="label">Brush tools</span>
+        </div>
+        <div class="thumb" style="background-image:url('assets/screenshot-map.png')"
+             data-caption="Caucasus — alt-history sandbox"
+             data-sub="Custom nations and restored borders">
+          <span class="label">Caucasus sandbox</span>
+        </div>
+      </div>
+    </section>
+
+    <p class="muted text-center reveal" style="margin: 22px 0 8px;">
+      All footage from the pre-alpha build. Art &amp; maps by <strong>Hilmi</strong>.
+    </p>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-links">
+        <a href="about.html">About Us</a>
+        <a href="terms.html">Terms &amp; Conditions</a>
+        <a href="updates.html">Updates</a>
+      </div>
+      <div class="footer-meta">© 2026 Heredita — <span class="muted">heredita.net</span></div>
+    </div>
+  </footer>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

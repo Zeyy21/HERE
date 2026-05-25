@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Heredita — Roleplay the World</title>
+  <meta name="description" content="Heredita is a roleplay geopolitical simulator. Paint the map, roll the dice, rewrite history." />
+  <link rel="icon" href="assets/heredita-icon.webp" type="image/webp" />
+  <link rel="stylesheet" href="css/chalkboard.css" />
+</head>
+<body class="with-dust">
+
+  <main class="auth-wrap container">
+    <img class="auth-logo" src="assets/heredita-logo-full.webp" alt="Heredita" />
+    <p class="auth-tagline">Roll the dice. Paint the map. <span class="accent">Rewrite history.</span></p>
+
+    <section class="chalk-card auth-card" aria-labelledby="authTitle">
+      <h2 id="authTitle" class="text-center tilt-l" style="margin-top:0">Join the timeline</h2>
+
+      <div class="auth-tabs" role="tablist" aria-label="Authentication">
+        <button class="active" data-tab="signup" role="tab" aria-selected="true">Sign up</button>
+        <button data-tab="signin" role="tab" aria-selected="false">Sign in</button>
+      </div>
+
+      <!-- SIGN UP -->
+      <form id="signupForm" class="auth-panel" data-panel="signup" novalidate>
+        <div class="field">
+          <label for="su-username">Username</label>
+          <input id="su-username" name="username" type="text" autocomplete="username"
+                 placeholder="e.g. CountDookuEnjoyer" minlength="3" maxlength="20" required />
+        </div>
+
+        <div class="field">
+          <label for="su-dob">Date of birth</label>
+          <input id="su-dob" name="dob" type="date" required />
+        </div>
+
+        <div class="field">
+          <label for="su-pw">Password</label>
+          <input id="su-pw" name="password" type="password" autocomplete="new-password"
+                 placeholder="At least 6 characters" minlength="6" required />
+        </div>
+
+        <div class="field">
+          <label for="su-pw2">Confirm password</label>
+          <input id="su-pw2" name="confirm" type="password" autocomplete="new-password" required />
+        </div>
+
+        <label class="checkbox" style="margin: 8px 0 4px;">
+          <input id="tosCheck" type="checkbox" />
+          <span class="box" aria-hidden="true"></span>
+          <span>I agree to the <a href="terms.html">Terms &amp; Conditions</a>.</span>
+        </label>
+
+        <div class="form-actions">
+          <button class="btn btn-primary" type="submit" data-requires-tos disabled>Create account</button>
+          <div class="row-or">or</div>
+          <button id="guestBtn" class="btn" type="button" data-requires-tos disabled>Play as Guest</button>
+        </div>
+      </form>
+
+      <!-- SIGN IN -->
+      <form id="signinForm" class="auth-panel" data-panel="signin" hidden novalidate>
+        <div class="field">
+          <label for="si-username">Username</label>
+          <input id="si-username" name="username" type="text" autocomplete="username" required />
+        </div>
+        <div class="field">
+          <label for="si-pw">Password</label>
+          <input id="si-pw" name="password" type="password" autocomplete="current-password" required />
+        </div>
+
+        <div class="form-actions">
+          <button class="btn btn-primary" type="submit" data-requires-tos disabled>Sign in</button>
+          <div class="row-or">or</div>
+          <button class="btn" type="button" data-requires-tos disabled
+                  onclick="document.querySelector('[data-tab=signup]').click()">Create a new account</button>
+        </div>
+      </form>
+    </section>
+
+    <p class="muted text-center" style="margin-top:18px; font-size:.95rem;">
+      By continuing you confirm you've read our placeholder Terms.
+    </p>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-links">
+        <a href="about.html">About Us</a>
+        <a href="terms.html">Terms &amp; Conditions</a>
+        <a href="updates.html">Updates</a>
+      </div>
+      <div class="footer-meta">© 2026 Heredita — <span class="muted">heredita.net</span></div>
+    </div>
+  </footer>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

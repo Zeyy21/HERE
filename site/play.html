@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Heredita — Play</title>
+  <link rel="icon" href="assets/heredita-icon.webp" type="image/webp" />
+  <link rel="stylesheet" href="css/chalkboard.css" />
+</head>
+<body class="with-dust">
+
+  <header class="topbar">
+    <div class="inner">
+      <a class="brand" href="home.html" aria-label="Heredita — Home">
+        <img src="assets/heredita-icon.webp" alt="" />
+        <span class="brand-name">Heredita</span>
+      </a>
+      <button class="nav-toggle" aria-label="Toggle navigation">Menu</button>
+      <nav aria-label="Primary">
+        <a href="home.html">Home</a>
+        <a href="play.html" class="active">Play</a>
+        <a href="updates.html">Updates</a>
+        <a href="about.html">About</a>
+      </nav>
+      <div class="spacer"></div>
+      <div class="coin-chip" title="In-game currency — coming soon">
+        <span class="coin" aria-hidden="true"></span>
+        <span>0</span>
+        <span class="soon">coming soon</span>
+      </div>
+      <div class="user-chip">
+        <span class="avatar">G</span>
+        <span class="name">Guest</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" style="padding-top: 30px;">
+
+    <section class="text-center reveal" style="padding: 20px 16px 10px;">
+      <h1 class="tilt-l" style="font-size: clamp(2.6rem, 6vw, 4.4rem); margin-bottom: 6px;">
+        Ready to rewrite history?
+      </h1>
+      <p class="muted" style="font-size: 1.25rem; max-width: 620px; margin: 0 auto 22px;">
+        One click. One map. Infinite timelines. The game runs in your browser — no download.
+      </p>
+      <div class="row" style="justify-content: center; gap: 14px;">
+        <a href="https://app.heredita.net/app/" data-play class="btn btn-primary btn-huge">▶ PLAY</a>
+      </div>
+      <p class="muted" style="margin-top: 16px; font-size: .95rem;">
+        Opens <code style="color:var(--accent-soft)">app.heredita.net</code> in this tab.
+      </p>
+    </section>
+
+    <!-- Preview footage showcase -->
+    <div class="section-title reveal">
+      <h2 class="tilt-r">Preview Footage</h2>
+      <span class="muted">while it loads, take a tour</span>
+    </div>
+
+    <section id="previewShowcase" class="chalk-card preview-showcase reveal" tabindex="0" aria-label="Preview footage carousel">
+      <div class="preview-stage" aria-live="polite">
+        <div class="slide active"
+             style="background-image:url('assets/screenshot-1945.png')"
+             data-full="assets/screenshot-1945.png"></div>
+        <div class="slide"
+             style="background-image:url('assets/screenshot-front.png')"
+             data-full="assets/screenshot-front.png"></div>
+        <div class="slide"
+             style="background-image:url('assets/screenshot-poland-chat.png')"
+             data-full="assets/screenshot-poland-chat.png"></div>
+        <div class="slide"
+             style="background-image:url('assets/screenshot-tools.png')"
+             data-full="assets/screenshot-tools.png"></div>
+        <div class="slide"
+             style="background-image:url('assets/screenshot-map.png')"
+             data-full="assets/screenshot-map.png"></div>
+
+        <span class="tag-live">● Pre-Alpha</span>
+        <button class="stage-nav prev" aria-label="Previous slide">‹</button>
+        <button class="stage-nav next" aria-label="Next slide">›</button>
+
+        <div class="stage-overlay">
+          <p class="caption">December 3rd, 1945 — Europe in flux</p>
+          <p class="sub">Players: Whirling, CountDookuEnjoyer, fish</p>
+        </div>
+        <div class="preview-progress"><div class="bar"></div></div>
+      </div>
+
+      <div class="preview-thumbs" role="tablist" aria-label="Footage chapters">
+        <div class="thumb active" style="background-image:url('assets/screenshot-1945.png')"
+             data-caption="December 3rd, 1945 — Europe in flux"
+             data-sub="Players: Whirling, CountDookuEnjoyer, fish">
+          <span class="label">1945 — Postwar map</span>
+        </div>
+        <div class="thumb" style="background-image:url('assets/screenshot-front.png')"
+             data-caption="The Front — Poland holds the line"
+             data-sub="Hatched red shows contested territory">
+          <span class="label">Contested fronts</span>
+        </div>
+        <div class="thumb" style="background-image:url('assets/screenshot-poland-chat.png')"
+             data-caption="1938 — Chat & diplomacy"
+             data-sub="Players negotiate before annexation">
+          <span class="label">Chat & diplomacy</span>
+        </div>
+        <div class="thumb" style="background-image:url('assets/screenshot-tools.png')"
+             data-caption="Brush tools & palette"
+             data-sub="Paint borders, found cities, restore nations">
+          <span class="label">Brush tools</span>
+        </div>
+        <div class="thumb" style="background-image:url('assets/screenshot-map.png')"
+             data-caption="Caucasus — alt-history sandbox"
+             data-sub="Custom nations and restored borders">
+          <span class="label">Caucasus sandbox</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quick feature trio under the showcase -->
+    <div class="about-grid reveal" style="margin-top: 26px;">
+      <div class="chalk-card">
+        <h3><span class="ico" aria-hidden="true">🎲</span> Dice-driven outcomes</h3>
+        <p>No hidden combat math. What you roll is what happens.</p>
+      </div>
+      <div class="chalk-card">
+        <h3><span class="ico" aria-hidden="true">🖌</span> Paint, don't push</h3>
+        <p>Brushes instead of units. Redraw borders, found cities, restore nations.</p>
+      </div>
+      <div class="chalk-card">
+        <h3><span class="ico" aria-hidden="true">💬</span> Talk first, annex later</h3>
+        <p>Live chat with neighbors before the dice ever leave the cup.</p>
+      </div>
+    </div>
+
+    <div class="text-center reveal" style="margin: 30px 0;">
+      <a class="btn btn-ghost" href="home.html">← Back to home</a>
+    </div>
+  </main>
+
+  <!-- Launch overlay -->
+  <div id="loadingOverlay" class="loading-overlay" role="status" aria-live="polite">
+    <div class="spinner" aria-hidden="true"></div>
+    <h2>Launching Heredita…</h2>
+    <p id="loadingStatus" class="muted">Sharpening chalk…</p>
+  </div>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-links">
+        <a href="about.html">About Us</a>
+        <a href="terms.html">Terms &amp; Conditions</a>
+        <a href="updates.html">Updates</a>
+      </div>
+      <div class="footer-meta">© 2026 Heredita — <span class="muted">heredita.net</span></div>
+    </div>
+  </footer>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
