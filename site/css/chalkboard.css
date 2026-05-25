@@ -1362,33 +1362,59 @@ a.chalk-card:active,
 
 .country-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  max-height: 520px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  max-height: 560px;
   overflow-y: auto;
-  padding-right: 6px;
+  padding: 4px 8px 4px 2px;
 }
 .country-chip {
-  display: flex; flex-direction: column; align-items: center; gap: 4px;
-  padding: 8px 4px;
-  border-radius: 10px;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 10px 6px 8px;
+  border-radius: 12px;
   border: 2px dashed transparent;
+  background: rgba(0,0,0,0.22);
   cursor: pointer;
   transition: transform .15s ease, border-color .15s ease, background .15s ease;
+  min-height: 96px;
 }
-.country-chip:hover { background: rgba(244,241,230,0.05); transform: translateY(-2px); }
+.country-chip:hover {
+  background: rgba(244,241,230,0.08);
+  transform: translateY(-2px);
+  border-color: rgba(244,241,230,0.35);
+}
 .country-chip.active {
   border-color: var(--accent);
-  background: rgba(217,122,61,0.15);
+  border-style: solid;
+  background: rgba(217,122,61,0.20);
+  box-shadow: 0 0 0 2px rgba(217,122,61,0.30), 0 6px 14px rgba(0,0,0,0.4);
+}
+.country-chip svg {
+  flex: 0 0 auto;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
 }
 .country-chip .name {
-  font-family: 'Caveat', cursive;
-  font-size: 0.95rem;
-  color: var(--chalk-soft);
+  font-family: 'Architects Daughter', 'Kalam', cursive;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #ffffff;
   text-align: center;
-  line-height: 1.05;
+  line-height: 1.15;
+  letter-spacing: 0.2px;
+  /* keep names crisp regardless of background — chalkboard-flavored stroke */
+  text-shadow:
+    0 0 1px rgba(0,0,0,0.95),
+    0 1px 2px rgba(0,0,0,0.85),
+    0 0 6px rgba(0,0,0,0.55);
+  word-break: break-word;
+  hyphens: auto;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  max-width: 100%;
 }
-.country-chip.active .name { color: var(--chalk); }
+.country-chip.active .name { color: #fff8e0; }
 .country-grid::-webkit-scrollbar { width: 8px; }
 .country-grid::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 8px; }
 .country-grid::-webkit-scrollbar-thumb {
@@ -1472,7 +1498,10 @@ a.chalk-card:active,
     grid-template-columns: 1fr;
   }
   .avatar-stage { width: min(280px, 70vw); }
-  .country-grid { grid-template-columns: repeat(4, 1fr); max-height: 320px; }
+  .country-grid {
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    max-height: 360px;
+  }
 }
 
 /* Reduced motion */

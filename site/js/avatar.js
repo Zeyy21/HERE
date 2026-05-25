@@ -345,13 +345,16 @@
       `
       : '';
 
+    // Ball geometry: full-size sphere centered in the 200x200 viewBox so the
+    // flag completely fills the circle. Accessories (hats, props) are drawn
+    // around it in extra space — that's fine since SVG doesn't clip outside.
     return `
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="${size}" height="${size}" role="img" aria-label="${flag.name} countryball">
         <defs>
           <clipPath id="${uid}-clip"><circle cx="100" cy="110" r="80"/></clipPath>
           <radialGradient id="${uid}-shine" cx="35%" cy="30%" r="60%">
-            <stop offset="0%"  stop-color="#fff" stop-opacity="0.85"/>
-            <stop offset="40%" stop-color="#fff" stop-opacity="0.18"/>
+            <stop offset="0%"  stop-color="#fff" stop-opacity="0.55"/>
+            <stop offset="50%" stop-color="#fff" stop-opacity="0.10"/>
             <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
           </radialGradient>
           <radialGradient id="${uid}-shadow" cx="50%" cy="50%" r="50%">
@@ -361,11 +364,12 @@
         </defs>
         <ellipse cx="100" cy="194" rx="60" ry="8" fill="url(#${uid}-shadow)"/>
         <g clip-path="url(#${uid}-clip)">
-          <g transform="translate(50 70) scale(1.0 1.5)">
-            <svg viewBox="0 0 100 60" width="100" height="60" preserveAspectRatio="xMidYMid slice">
-              ${flag.svg}
-            </svg>
-          </g>
+          <!-- Flag fills the full 160x160 bounding box of the ball circle.
+               preserveAspectRatio="xMidYMid slice" makes the 100x60 flag
+               cover the square without distortion. -->
+          <svg x="20" y="30" width="160" height="160" viewBox="0 0 100 60" preserveAspectRatio="xMidYMid slice">
+            ${flag.svg}
+          </svg>
         </g>
         <circle cx="100" cy="110" r="80" fill="url(#${uid}-shine)" pointer-events="none"/>
         <circle cx="100" cy="110" r="80" fill="none" stroke="#000" stroke-width="3"/>
@@ -383,14 +387,13 @@
         <defs>
           <clipPath id="${uid}-clip"><circle cx="100" cy="100" r="92"/></clipPath>
           <radialGradient id="${uid}-shine" cx="35%" cy="30%" r="60%">
-            <stop offset="0%"  stop-color="#fff" stop-opacity="0.7"/>
-            <stop offset="60%" stop-color="#fff" stop-opacity="0"/>
+            <stop offset="0%"  stop-color="#fff" stop-opacity="0.45"/>
+            <stop offset="70%" stop-color="#fff" stop-opacity="0"/>
           </radialGradient>
         </defs>
         <g clip-path="url(#${uid}-clip)">
-          <g transform="translate(40 60) scale(1.2 1.4)">
-            <svg viewBox="0 0 100 60" width="100" height="60" preserveAspectRatio="xMidYMid slice">${flag.svg}</svg>
-          </g>
+          <!-- Flag fills the entire ball (184x184 around the r=92 circle). -->
+          <svg x="8" y="8" width="184" height="184" viewBox="0 0 100 60" preserveAspectRatio="xMidYMid slice">${flag.svg}</svg>
         </g>
         <circle cx="100" cy="100" r="92" fill="url(#${uid}-shine)"/>
         <circle cx="100" cy="100" r="92" fill="none" stroke="#000" stroke-width="4"/>
@@ -431,8 +434,8 @@
     function renderCountries() {
       const grid = $('#countryGrid', root);
       grid.innerHTML = visibleIds().map(id => `
-        <button type="button" class="country-chip ${id === state.country ? 'active' : ''}" data-country="${id}">
-          ${buildFlagPreviewSVG(id, { size: 48 })}
+        <button type="button" class="country-chip ${id === state.country ? 'active' : ''}" data-country="${id}" title="${FLAGS[id].name}">
+          ${buildFlagPreviewSVG(id, { size: 56 })}
           <span class="name">${FLAGS[id].name}</span>
         </button>
       `).join('') || `<p class="muted" style="grid-column:1/-1; text-align:center; padding:14px;">No countries match "${search}".</p>`;
