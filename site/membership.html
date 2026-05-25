@@ -115,7 +115,7 @@
           <li>Early access to new features</li>
         </ul>
         <div class="tier-cta">
-          <button type="button" class="btn" data-tier-target="emperor">Notify me when Emperor opens</button>
+          <button type="button" class="btn emperor-locked" data-tier-target="emperor" title="Emperor unlocks with the paid release">Notify me when Emperor opens</button>
         </div>
       </article>
 
@@ -166,18 +166,17 @@
   <script src="js/avatar.js"></script>
   <script>
     // Allow clicking the tier buttons on this page to switch tier locally.
+    // Emperor is paywalled — setTier returns false and opens the paywall modal.
     document.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('[data-tier-target]').forEach(btn => {
         btn.addEventListener('click', () => {
           const tier = btn.dataset.tierTarget;
-          window.HereditaSession.setTier(tier);
+          const ok = window.HereditaSession.setTier(tier);
+          if (!ok) return; // paywall handled it
           window.HereditaSession.renderUserChip();
-          // toast
           const t = document.createElement('div');
           t.className = 'toast show';
-          t.textContent = (tier === 'emperor')
-            ? '👑 We\'ll notify you when Emperor opens — switched to Emperor preview.'
-            : '✓ Switched to ' + tier.charAt(0).toUpperCase() + tier.slice(1) + ' tier.';
+          t.textContent = '✓ Switched to ' + tier.charAt(0).toUpperCase() + tier.slice(1) + ' tier.';
           document.body.appendChild(t);
           setTimeout(() => t.remove(), 2200);
         });

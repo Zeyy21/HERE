@@ -56,6 +56,27 @@
       <span class="muted">browse — buying enabled soon</span>
     </div>
 
+    <!-- BIG LOCK BANNER -->
+    <section class="chalk-card reveal" style="position: relative; padding: 32px 24px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 14px; margin-bottom: 22px; overflow: hidden;">
+      <span class="lock-stamp" style="position:absolute; top:14px; right:14px; background:var(--accent); color:var(--board-3); font-family:'Caveat',cursive; font-weight:700; padding:4px 14px; border-radius:999px; border:2px solid var(--chalk); font-size:0.95rem; transform:rotate(8deg); letter-spacing:0.4px; box-shadow:0 4px 12px rgba(0,0,0,0.5);">Coming Soon</span>
+
+      <svg class="lock-icon" viewBox="0 0 200 220" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="width:clamp(96px,12vw,140px); filter:drop-shadow(0 8px 18px rgba(0,0,0,0.5));">
+        <path class="shackle" d="M60,100 V70 a40,40 0 0 1 80,0 V100" fill="none" stroke="rgba(244,241,230,0.92)" stroke-width="14" stroke-linecap="round"/>
+        <rect class="body" x="38" y="100" width="124" height="100" rx="14" fill="rgba(244,241,230,0.92)" stroke="var(--board-3)" stroke-width="4"/>
+        <circle class="keyhole" cx="100" cy="142" r="11" fill="var(--board-3)"/>
+        <rect class="keyhole" x="95" y="148" width="10" height="28" rx="2" fill="var(--board-3)"/>
+      </svg>
+
+      <h2 class="tilt-l" style="margin:0; font-size:clamp(1.8rem,3.5vw,2.6rem);">Store — Locked</h2>
+      <p class="muted" style="max-width:54ch; margin:0;">
+        Coins, checkout and inventory unlock with the paid release. Until then this is a preview — every item below is a real planned drop, with placeholder pricing.
+      </p>
+      <div class="row" style="justify-content:center; gap:12px; margin-top:6px;">
+        <a class="btn btn-primary" href="membership.html">See membership tiers</a>
+        <a class="btn btn-ghost" href="updates.html">Watch for updates</a>
+      </div>
+    </section>
+
     <!-- FEATURED -->
     <div class="store-featured">
 
@@ -107,12 +128,13 @@
 
     </div>
 
-    <!-- AVATAR ITEMS -->
+    <!-- AVATAR ITEMS (locked) -->
     <div class="section-title reveal" style="margin-top:36px;">
       <h2 class="tilt-r">Avatar Items</h2>
-      <span class="muted">customize your countryball</span>
+      <span class="muted">🔒 locked — preview only</span>
     </div>
-    <div class="store-grid">
+    <div class="lock-wrap reveal">
+    <div class="store-grid lock-target" aria-hidden="true">
 
       <article class="chalk-card store-item reveal">
         <div class="thumb">
@@ -209,13 +231,26 @@
       </article>
 
     </div>
+      <div class="lock-overlay" role="status" aria-label="Avatar items locked">
+        <span class="lock-stamp">Locked</span>
+        <svg class="lock-icon" viewBox="0 0 200 220" aria-hidden="true">
+          <path class="shackle" d="M60,100 V70 a40,40 0 0 1 80,0 V100"/>
+          <rect class="body" x="38" y="100" width="124" height="100" rx="14"/>
+          <circle class="keyhole" cx="100" cy="142" r="11"/>
+          <rect class="keyhole" x="95" y="148" width="10" height="28" rx="2"/>
+        </svg>
+        <h2>Avatar Items — Locked</h2>
+        <p>Unlocks with the paid Store release. Browse the preview above to see what's planned.</p>
+      </div>
+    </div>
 
-    <!-- BRUSHES & DICE -->
+    <!-- BRUSHES & DICE (locked) -->
     <div class="section-title reveal" style="margin-top:36px;">
       <h2 class="tilt-r">Brushes &amp; Dice</h2>
-      <span class="muted">tools of the trade</span>
+      <span class="muted">🔒 locked — preview only</span>
     </div>
-    <div class="store-grid">
+    <div class="lock-wrap reveal">
+    <div class="store-grid lock-target" aria-hidden="true">
 
       <article class="chalk-card store-item reveal">
         <div class="thumb">
@@ -282,6 +317,18 @@
         </div>
       </article>
 
+    </div>
+      <div class="lock-overlay" role="status" aria-label="Brushes and dice locked">
+        <span class="lock-stamp">Locked</span>
+        <svg class="lock-icon" viewBox="0 0 200 220" aria-hidden="true">
+          <path class="shackle" d="M60,100 V70 a40,40 0 0 1 80,0 V100"/>
+          <rect class="body" x="38" y="100" width="124" height="100" rx="14"/>
+          <circle class="keyhole" cx="100" cy="142" r="11"/>
+          <rect class="keyhole" x="95" y="148" width="10" height="28" rx="2"/>
+        </svg>
+        <h2>Brushes &amp; Dice — Locked</h2>
+        <p>Drops with the paid Store release alongside avatar items.</p>
+      </div>
     </div>
 
     <p class="muted text-center reveal" style="margin: 30px 0 8px;">

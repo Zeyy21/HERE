@@ -19,19 +19,69 @@
 
   // ---- Tier helpers ----
   const TIER_LABEL = { guest: 'Guest', regular: 'Regular', emperor: 'Emperor' };
+  // Emperor is paid — locked until paid release ships. Free tiers are self-switchable.
+  const FREE_TIERS = ['guest', 'regular'];
+  function isTierLocked(tier) { return !FREE_TIERS.includes(tier); }
   function getTier() {
     const s = getSession();
     if (!s) return 'guest';
     return s.tier || (s.guest ? 'guest' : 'regular');
   }
+  // Returns true if applied, false if the tier is paywalled and we showed the modal instead.
   function setTier(tier) {
+    if (isTierLocked(tier)) {
+      openPaywall({
+        title: 'Emperor — Locked',
+        body: 'Emperor opens with the paid release. We\'ll notify you the moment it ships.',
+        primaryLabel: '🔔 Notify me'
+      });
+      return false;
+    }
     const s = getSession() || { username: 'Guest' + Math.floor(Math.random() * 9000 + 1000), guest: true, coins: 0 };
     s.tier = tier;
     s.guest = (tier === 'guest');
     setSession(s);
+    return true;
   }
-  // expose for other modules (avatar.js, settings page)
-  window.HereditaSession = { get: getSession, set: setSession, clear: clearSession, getTier, setTier, TIER_LABEL };
+
+  // ---- Shared paywall modal ----
+  function openPaywall({ title, body, primaryLabel = 'Notify me' } = {}) {
+    // Reuse the existing lightbox shell (.lightbox)
+    const modal = document.createElement('div');
+    modal.className = 'lightbox';
+    modal.innerHTML = `
+      <button class="close" aria-label="Close">✕</button>
+      <div class="chalk-card" style="max-width: 460px; padding: 32px 28px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 14px; pointer-events: auto; cursor: default;">
+        <svg viewBox="0 0 200 220" aria-hidden="true" style="width: 110px; height: auto; filter: drop-shadow(0 8px 18px rgba(0,0,0,0.5));">
+          <path d="M60,100 V70 a40,40 0 0 1 80,0 V100" fill="none" stroke="rgba(244,241,230,0.92)" stroke-width="14" stroke-linecap="round"/>
+          <rect x="38" y="100" width="124" height="100" rx="14" fill="rgba(244,241,230,0.92)" stroke="#0f2018" stroke-width="4"/>
+          <circle cx="100" cy="142" r="11" fill="#0f2018"/>
+          <rect x="95" y="148" width="10" height="28" rx="2" fill="#0f2018"/>
+        </svg>
+        <h2 style="font-family:'Caveat',cursive; margin:0; font-size:2rem;">${title || 'Locked'}</h2>
+        <p style="margin:0; color: var(--chalk-soft); max-width: 38ch;">${body || 'This feature is locked until the paid release.'}</p>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-top:6px;">
+          <button class="btn btn-primary" data-paywall-notify>${primaryLabel}</button>
+          <button class="btn" data-paywall-close>Close</button>
+        </div>
+      </div>
+    `;
+    const close = () => modal.remove();
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal || e.target.classList.contains('close') || e.target.hasAttribute('data-paywall-close')) close();
+      if (e.target.hasAttribute('data-paywall-notify')) {
+        toast('✓ We\'ll let you know when it opens.');
+        close();
+      }
+    });
+    document.addEventListener('keydown', function onKey(e) {
+      if (e.key === 'Escape') { close(); document.removeEventListener('keydown', onKey); }
+    });
+    document.body.appendChild(modal);
+  }
+
+  // expose for other modules (avatar.js, settings page, membership)
+  window.HereditaSession = { get: getSession, set: setSession, clear: clearSession, getTier, setTier, isTierLocked, openPaywall, TIER_LABEL };
 
   // ---- Free-hat promo: Regular tier gets a tophat until 2026-08-28 ----
   const FREE_HAT_DEADLINE = new Date('2026-08-28T23:59:59');
@@ -366,8 +416,19 @@
     goto(0);
   }
 
+  // ---- Sanitize any previously-stored locked tier ----
+  // (e.g. someone set Emperor in localStorage before paywall existed)
+  function sanitizeStoredTier() {
+    const s = getSession();
+    if (s && isTierLocked(s.tier)) {
+      s.tier = s.guest ? 'guest' : 'regular';
+      setSession(s);
+    }
+  }
+
   // ---------- init ----------
   document.addEventListener('DOMContentLoaded', () => {
+    sanitizeStoredTier();
     applyFreeHatIfEligible();
     wireNavToggle();
     wirePlayCtas();

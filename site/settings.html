@@ -85,8 +85,9 @@
         <div class="tier-switch" role="radiogroup" aria-label="Tier preview">
           <button type="button" data-tier="guest">Guest</button>
           <button type="button" data-tier="regular">Regular</button>
-          <button type="button" data-tier="emperor">Emperor</button>
+          <button type="button" data-tier="emperor" class="locked" aria-disabled="true" title="Emperor unlocks with the paid release">Emperor</button>
         </div>
+        <p class="muted" style="font-size: 0.9rem; margin: 4px 0 0;">🔒 Emperor is paywalled — placeholder for now.</p>
         <div class="settings-row">
           <div class="label">
             <span class="key">Compare tiers</span>
@@ -261,11 +262,17 @@
       const tierBtns = document.querySelectorAll('.tier-switch button');
       function refreshTierBtns() {
         const t = S.getTier();
-        tierBtns.forEach(b => b.classList.toggle('active', b.dataset.tier === t));
+        tierBtns.forEach(b => {
+          // never mark a locked button as active
+          const isActive = b.dataset.tier === t && !S.isTierLocked(b.dataset.tier);
+          b.classList.toggle('active', isActive);
+        });
       }
       refreshTierBtns();
       tierBtns.forEach(b => b.addEventListener('click', () => {
-        S.setTier(b.dataset.tier);
+        // setTier returns false + opens paywall if tier is locked
+        const ok = S.setTier(b.dataset.tier);
+        if (!ok) return;
         S.renderUserChip();
         refreshTierBtns();
         refreshAccount();

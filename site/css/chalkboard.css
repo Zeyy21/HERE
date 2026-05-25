@@ -1783,6 +1783,127 @@ a.chalk-card:active,
   .tier-badge { font-size: 0.85rem; padding: 1px 8px; }
 }
 
+/* ============================================================
+   LOCK OVERLAY — placeholder paywall / coming-soon gate
+   Wrap any block in <div class="lock-wrap"> + add a child
+   <div class="lock-overlay">…</div> as a sibling AFTER the content.
+   ============================================================ */
+.lock-wrap {
+  position: relative;
+  /* keep underlying content visible but unreachable */
+}
+.lock-wrap > .lock-target {
+  filter: blur(3px) saturate(0.85);
+  opacity: 0.55;
+  pointer-events: none;
+  user-select: none;
+  /* prevent keyboard focus reaching locked content */
+}
+.lock-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 14px;
+  padding: 32px 24px;
+  background:
+    radial-gradient(ellipse at center, rgba(15,32,24,0.55), rgba(15,32,24,0.85));
+  border-radius: var(--radius);
+  pointer-events: auto;
+  backdrop-filter: blur(2px);
+}
+.lock-overlay::before {
+  content: "";
+  position: absolute;
+  inset: 18px;
+  border: 3px dashed rgba(244,241,230,0.55);
+  border-radius: calc(var(--radius) - 4px);
+  pointer-events: none;
+  animation: lock-pulse 3s ease-in-out infinite;
+}
+@keyframes lock-pulse {
+  0%, 100% { opacity: 0.55; transform: rotate(-0.3deg); }
+  50%      { opacity: 0.85; transform: rotate(0.3deg); }
+}
+
+.lock-overlay .lock-icon {
+  width: clamp(96px, 14vw, 160px);
+  height: auto;
+  filter: drop-shadow(0 8px 18px rgba(0,0,0,0.5));
+}
+.lock-overlay .lock-icon .body {
+  fill: rgba(244,241,230,0.92);
+  stroke: var(--board-3);
+  stroke-width: 4;
+}
+.lock-overlay .lock-icon .shackle {
+  fill: none;
+  stroke: rgba(244,241,230,0.92);
+  stroke-width: 14;
+  stroke-linecap: round;
+  /* slight chalk wobble using dasharray */
+  stroke-dasharray: 220;
+  stroke-dashoffset: 0;
+}
+.lock-overlay .lock-icon .keyhole {
+  fill: var(--board-3);
+}
+.lock-overlay .lock-icon .accent {
+  fill: var(--accent);
+  opacity: 0.85;
+}
+.lock-overlay h2 {
+  font-family: 'Caveat', cursive;
+  font-size: clamp(2rem, 4vw, 3rem);
+  margin: 0;
+  color: var(--chalk);
+  text-shadow: 0 2px 8px rgba(0,0,0,0.7);
+}
+.lock-overlay p {
+  font-family: 'Architects Daughter', cursive;
+  color: var(--chalk-soft);
+  font-size: 1.05rem;
+  max-width: 46ch;
+  margin: 0;
+}
+.lock-overlay .lock-actions {
+  display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
+  margin-top: 6px;
+}
+.lock-overlay .lock-stamp {
+  position: absolute;
+  top: 14px; right: 14px;
+  background: var(--accent);
+  color: var(--board-3);
+  font-family: 'Caveat', cursive;
+  font-weight: 700;
+  padding: 4px 14px;
+  border-radius: 999px;
+  border: 2px solid var(--chalk);
+  font-size: 0.95rem;
+  transform: rotate(8deg);
+  letter-spacing: 0.4px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+
+/* Disabled-emperor visual on tier-switch & buttons */
+.tier-switch button[data-tier="emperor"].locked,
+.tier-card .btn.emperor-locked {
+  position: relative;
+  cursor: not-allowed;
+  opacity: 0.85;
+}
+.tier-switch button[data-tier="emperor"].locked::after,
+.tier-card .btn.emperor-locked::after {
+  content: "🔒";
+  margin-left: 6px;
+  font-size: 0.9em;
+}
+
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
