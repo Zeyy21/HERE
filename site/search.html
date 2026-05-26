@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Heredita — Find Player</title>
   <link rel="icon" href="assets/heredita-icon.webp" type="image/webp" />
-  <link rel="stylesheet" href="css/chalkboard.css?v=20260526-1" />
+  <link rel="stylesheet" href="css/chalkboard.css?v=20260526-2" />
 </head>
 <body>
 
@@ -113,13 +113,11 @@
     </div>
   </footer>
 
-  <script src="js/api.js?v=20260526-1"></script>
-  <script src="js/app.js?v=20260526-1"></script>
-  <script src="js/chat-config.js?v=20260526-1"></script>
-  <script src="js/auth-config.js?v=20260526-1"></script>
-  <script src="js/auth-supabase.js?v=20260526-1"></script>
-  <script src="js/avatar.js?v=20260526-1"></script>
-  <script src="js/social-nav.js?v=20260526-1"></script>
+  <script src="js/api.js?v=20260526-2"></script>
+  <script src="js/app.js?v=20260526-2"></script>
+  <script src="js/chat-config.js?v=20260526-2"></script>
+  <script src="js/avatar.js?v=20260526-2"></script>
+  <script src="js/social-nav.js?v=20260526-2"></script>
   <script>
     document.addEventListener('DOMContentLoaded', async () => {
       const API = window.HereditaAPI;
@@ -131,10 +129,6 @@
       const input     = document.getElementById('searchInput');
       const result    = document.getElementById('resultPanel');
 
-      // Wait for Supabase to hydrate any existing session before deciding.
-      if (window.HereditaAuth && window.HereditaAuth.ready) {
-        try { await window.HereditaAuth.ready(); } catch (_) {}
-      }
       const session = S && S.get();
 
       if (!S.isSignedIn()) {

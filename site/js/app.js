@@ -32,11 +32,10 @@
   function clearSession() { localStorage.removeItem(SESSION_KEY); }
 
   // ---- Sign-in detection: a session counts as "signed in" if it has a
-  // uid (set by Supabase) and isn't flagged as guest. Tokens are no longer
-  // stored locally (Supabase handles them in its own storage). ----
+  // game-API token + username and isn't flagged as guest. ----
   function isSignedIn() {
     const s = getSession();
-    return !!(s && s.uid && !s.guest && s.username);
+    return !!(s && s.token && !s.guest && s.username);
   }
 
   // ---- Tier helpers ----
@@ -396,22 +395,29 @@
     }
     if (tos) { tos.addEventListener('change', syncGate); syncGate(); }
 
-    // Auth backend = Firebase (cloud, cross-device). The game API is no
-    // longer used for sign-up/sign-in on the website.
-    const FAUTH = window.HereditaAuth;
+    // Auth backend = Heredita game API at app.heredita.net.
+    // CORS only allows https://heredita.net (which we are on now), so this
+    // works end-to-end including Friends and Search.
+    const API = window.HereditaAPI;
 
-    function persistAndGo(profile) {
-      // profile = { id|uid, email, username, displayName } from auth provider
+    async function persistAndGo(username, token) {
+      // Best-effort: fetch rank from /users/me so the topbar can show it.
+      let rank = 'player', userId = null;
+      try {
+        const me = await API.getMe(token);
+        if (me.ok) { rank = me.user.rank || 'player'; userId = me.user.id; }
+      } catch (_) {}
       setSession({
-        uid: profile.id || profile.uid,
-        username: profile.username,
-        email: profile.email,
+        uid: userId,
+        username,
+        token,
+        rank,
         guest: false,
         tier: 'regular',
         coins: 0
       });
       renderUserChip();
-      toast('Welcome, ' + profile.username + '!');
+      toast('Welcome, ' + username + '!');
       setTimeout(() => location.href = 'home.html', 500);
     }
 
@@ -428,6 +434,8 @@
     }
 
     // ---- sign up ----
+    // Calls POST /auth/users/new on the game API, then POST /auth/token to
+    // get a bearer for the new account, then routes to home.
     const signupForm = $('#signupForm');
     if (signupForm) {
       signupForm.addEventListener('submit', async (e) => {
@@ -437,51 +445,45 @@
           if (!tos.checked) { toast('Please agree to the Terms first.'); return; }
           const fd = new FormData(signupForm);
           const username = (fd.get('username') || '').toString().trim();
-          const email    = (fd.get('email') || '').toString().trim();
           const dob      = (fd.get('dob') || '').toString();
           const pw       = (fd.get('password') || '').toString();
           const pw2      = (fd.get('confirm') || '').toString();
-          // Pre-validate so users get clear errors before the network call.
-          const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-          if (username.length < 3) return toast('Username must be 3+ characters.');
-          if (!/^[A-Za-z0-9_.\-]+$/.test(username))
-                                  return toast('Username: letters, numbers, _ . - only.');
-          if (!email)             return toast('Please enter your email.');
-          if (!EMAIL_RE.test(email))
-                                  return toast('Email looks wrong — needs an @ and a domain (e.g. you@gmail.com).');
-          if (email.toLowerCase() === username.toLowerCase())
-                                  return toast('Email and username are identical — did you paste the wrong value?');
-          if (!dob)               return toast('Please enter your date of birth.');
-          if (pw.length < 6)      return toast('Password must be 6+ characters.');
-          if (pw !== pw2)         return toast('Passwords do not match.');
-
-          if (!FAUTH) {
-            toast('Auth backend not loaded — refresh the page.');
-            return;
-          }
+          if (username.length < 3)               return toast('Username must be 3+ characters.');
+          if (!/^[A-Za-z0-9_.\-]+$/.test(username)) return toast('Username: letters, numbers, _ . - only.');
+          if (!dob)                              return toast('Please enter your date of birth.');
+          if (pw.length < 6)                     return toast('Password must be 6+ characters.');
+          if (pw !== pw2)                        return toast('Passwords do not match.');
 
           setBusy(btn, true, 'Creating account…');
-          console.log('[heredita][auth] signUp', { username, email });
-          const r = await FAUTH.signUp({ email, username, dob, password: pw });
-          console.log('[heredita][auth] signUp result', r);
-          if (!r.ok) {
-            toast(r.message || 'Could not create account.');
+          console.log('[heredita][auth] register', { username });
+
+          const reg = await API.register(username, pw);
+          console.log('[heredita][auth] register result', reg);
+          if (!reg.ok) {
+            if (reg.error === 'taken') {
+              toast('Username already taken — try signing in instead.');
+              return;
+            }
+            if (reg.error === 'ratelimited') {
+              toast('Too many sign-ups — wait a minute and try again.');
+              return;
+            }
+            toast(reg.message || 'Could not create account.');
             return;
           }
-          // If email confirmation is required, the user isn't signed in yet.
-          if (r.needsConfirm) {
-            toast('✓ Check your email — we sent a confirmation link to ' + email + '.', 5000);
-            // Show a clearer in-place message; switch to Sign in tab so they
-            // can come back and log in once they've clicked the link.
-            setTimeout(() => {
-              const tab = document.querySelector('[data-tab="signin"]');
-              if (tab) tab.click();
-              const si = document.getElementById('si-username');
-              if (si) si.value = email;
-            }, 1200);
+
+          // Auto-login immediately with the credentials we just used.
+          const lg = await API.login(username, pw);
+          console.log('[heredita][auth] auto-login result', lg);
+          if (!lg.ok) {
+            toast('Account created — please sign in: ' + (lg.message || ''));
+            const tab = document.querySelector('[data-tab="signin"]');
+            if (tab) tab.click();
+            const si = document.getElementById('si-username');
+            if (si) si.value = username;
             return;
           }
-          persistAndGo(r.user);
+          await persistAndGo(username, lg.token);
         } catch (err) {
           console.error('[heredita][auth] signup handler threw', err);
           toast('Something went wrong. Try again.');
@@ -499,24 +501,26 @@
         const btn = signinForm.querySelector('button[type="submit"]');
         try {
           const fd = new FormData(signinForm);
-          const emailOrUsername = (fd.get('username') || '').toString().trim();
-          const pw              = (fd.get('password') || '').toString();
-          if (!emailOrUsername || !pw) return toast('Enter your credentials.');
-
-          if (!FAUTH) {
-            toast('Auth backend not loaded — refresh the page.');
-            return;
-          }
+          const username = (fd.get('username') || '').toString().trim();
+          const pw       = (fd.get('password') || '').toString();
+          if (!username || !pw) return toast('Enter your credentials.');
 
           setBusy(btn, true, 'Signing in…');
-          console.log('[heredita][auth] firebase signIn', { id: emailOrUsername });
-          const r = await FAUTH.signIn({ emailOrUsername, password: pw });
-          console.log('[heredita][auth] firebase signIn result', r);
-          if (!r.ok) {
-            toast(r.message || 'Could not sign in.');
+          console.log('[heredita][auth] login', { username });
+          const lg = await API.login(username, pw);
+          console.log('[heredita][auth] login result', lg);
+          if (!lg.ok) {
+            if (lg.error === 'unauthorized') {
+              toast('Wrong username or password.');
+            }
+            if (lg.error === 'ratelimited') {
+              toast('Too many sign-in attempts — wait a minute.');
+              return;
+            }
+            toast(lg.message || 'Could not sign in.');
             return;
           }
-          persistAndGo(r.user);
+          await persistAndGo(username, lg.token);
         } catch (err) {
           console.error('[heredita][auth] signin handler threw', err);
           toast('Something went wrong. Try again.');
@@ -652,43 +656,23 @@
     }
   }
 
-  // ---- Sync local session with the cloud auth provider (Supabase).
-  // Important race condition: HereditaAuth.onChange fires SYNCHRONOUSLY
-  // once with the current cached profile (which is `null` before async
-  // init completes). We must NOT use that initial null to clobber a stored
-  // signed-in session — otherwise the user appears as "Guest" until Supabase
-  // finishes hydrating. We wait until ready() resolves before trusting any
-  // null event to mean "signed out".
-  function wireFirebaseAuthSync() {
-    const FA = window.HereditaAuth;
-    if (!FA) return;
-    let initDone = false;
-    FA.ready().then(() => { initDone = true; });
-
-    FA.onChange((profile) => {
-      const s = getSession();
-      if (profile) {
-        // Signed in (cloud) — mirror into local session.
-        const merged = Object.assign({}, s || {}, {
-          uid: profile.id || profile.uid,
-          username: profile.username,
-          email: profile.email,
-          guest: false,
-          tier: (s && s.tier) || 'regular'
-        });
-        setSession(merged);
-        renderUserChip();
-        return;
-      }
-      // profile === null:
-      //   - Before init done: don't trust it (could be the initial sync fire)
-      //   - After init done with a stored signed-in session: it's a real sign-out
-      if (!initDone) return;
-      if (s && !s.guest && s.uid) {
-        clearSession();
-        renderUserChip();
-      }
-    });
+  // ---- Verify stored game-API token in the background.
+  // Fire-and-forget on every page load: if the token is invalid (expired,
+  // revoked), demote the session to guest and re-render the chip.
+  async function verifyStoredToken() {
+    const API = window.HereditaAPI;
+    if (!API) return;
+    const s = getSession();
+    if (!s || !s.token || !s.username || s.guest) return;
+    try {
+      const v = await API.verifyTokenId(s.username, s.token);
+      if (v.ok) return; // still valid
+      if (v.error === 'cors' || v.error === 'network') return; // offline — don't punish
+      // Token's gone — clean up.
+      clearSession();
+      renderUserChip();
+      toast('Your session expired — please sign in again.');
+    } catch (_) {}
   }
 
   // ---------- init ----------
@@ -696,7 +680,8 @@
     sanitizeStoredTier();
     applyFreeHatIfEligible();
     wireNavToggle();
-    wireFirebaseAuthSync();
+    // Verify any stored game-API token in the background (non-blocking).
+    verifyStoredToken();
     wirePlayCtas();
     wireAuthPage();
     wireHomePage();

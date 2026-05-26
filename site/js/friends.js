@@ -30,11 +30,6 @@
     const app       = $('#friendsApp');
     const corsGate  = $('#corsGate');
 
-    // Wait for the auth provider to finish hydrating before deciding
-    // whether the user is signed in (avoids the "Guest" flash on load).
-    if (window.HereditaAuth && window.HereditaAuth.ready) {
-      try { await window.HereditaAuth.ready(); } catch (_) {}
-    }
     const session = S && S.get();
 
     // Not signed in (real check now) → placeholder.
