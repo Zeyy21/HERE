@@ -1963,12 +1963,17 @@ a.chalk-card:active,
 
 /* ============================================================
    SOCIAL DROPDOWN — injected into every topbar by social-nav.js
+   High-specificity selectors so the topbar's own `nav a` styles
+   (small padding, chalk underline) don't bleed into the menu.
    ============================================================ */
-.nav-dropdown {
+.topbar nav .nav-dropdown {
   position: relative;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
 }
-.nav-dropdown > .nav-dd-toggle {
+
+/* The "Social ▾" toggle — sized to match sibling nav links */
+.topbar nav .nav-dropdown > .nav-dd-toggle {
   background: transparent;
   border: none;
   color: var(--chalk-soft);
@@ -1978,70 +1983,105 @@ a.chalk-card:active,
   border-radius: 8px;
   cursor: pointer;
   letter-spacing: 0.2px;
+  line-height: 1.4;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
 }
-.nav-dropdown > .nav-dd-toggle:hover,
-.nav-dropdown.open > .nav-dd-toggle,
-.nav-dropdown > .nav-dd-toggle.active {
+.topbar nav .nav-dropdown > .nav-dd-toggle:hover,
+.topbar nav .nav-dropdown.open > .nav-dd-toggle,
+.topbar nav .nav-dropdown > .nav-dd-toggle.active {
   background: rgba(244,241,230,0.08);
   color: var(--chalk);
 }
-.nav-dropdown > .nav-dd-toggle .caret {
+.topbar nav .nav-dropdown > .nav-dd-toggle .caret {
   display: inline-block;
   margin-left: 4px;
-  font-size: 0.8em;
+  font-size: 0.75em;
   transition: transform .2s;
+  line-height: 1;
 }
-.nav-dropdown.open > .nav-dd-toggle .caret { transform: rotate(180deg); }
-.nav-dropdown .nav-dd-menu {
+.topbar nav .nav-dropdown.open > .nav-dd-toggle .caret { transform: rotate(180deg); }
+
+/* The popout panel itself */
+.topbar nav .nav-dropdown .nav-dd-menu {
   position: absolute;
-  top: calc(100% + 6px);
-  left: 0;
-  min-width: 180px;
-  background: rgba(10,22,15,0.97);
-  border: 2px dashed rgba(244,241,230,0.40);
-  border-radius: 10px;
-  padding: 6px;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 200px;
+  background: rgba(10,22,15,0.98);
+  border: 2px dashed rgba(244,241,230,0.45);
+  border-radius: 12px;
+  padding: 8px;
   display: none;
   flex-direction: column;
+  gap: 2px;
   z-index: 50;
-  box-shadow: 0 14px 32px rgba(0,0,0,0.55);
+  box-shadow: 0 14px 32px rgba(0,0,0,0.6);
 }
-.nav-dropdown.open .nav-dd-menu { display: flex; }
-.nav-dropdown .nav-dd-menu a {
-  display: flex; align-items: center; gap: 10px;
-  padding: 8px 12px;
-  font-family: 'Architects Daughter', cursive;
-  color: var(--chalk-soft);
-  text-decoration: none;
-  border: none;
-  border-radius: 8px;
-  font-size: 1.05rem;
+.topbar nav .nav-dropdown.open .nav-dd-menu { display: flex; }
+
+/* Items inside the panel — explicitly override the topbar's `nav a`
+   styles (font-size, padding, underline animation, vertical layout). */
+.topbar nav .nav-dropdown .nav-dd-menu a {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 8px 12px !important;
+  margin: 0 !important;
+  font-family: 'Architects Daughter', cursive !important;
+  font-size: 1.05rem !important;
+  color: var(--chalk-soft) !important;
+  text-decoration: none !important;
+  border: none !important;
+  border-radius: 8px !important;
+  line-height: 1.2 !important;
+  white-space: nowrap;
 }
-.nav-dropdown .nav-dd-menu a::after { display: none; }
-.nav-dropdown .nav-dd-menu a:hover {
-  background: rgba(244,241,230,0.10);
-  color: var(--chalk);
+/* Kill the chalk-underline animation that `.topbar nav a::after` adds */
+.topbar nav .nav-dropdown .nav-dd-menu a::after,
+.topbar nav .nav-dropdown .nav-dd-menu a::before {
+  content: none !important;
+  display: none !important;
 }
-.nav-dropdown .nav-dd-menu a.active {
-  color: var(--accent-soft);
-  background: rgba(217,122,61,0.12);
+.topbar nav .nav-dropdown .nav-dd-menu a:hover {
+  background: rgba(244,241,230,0.10) !important;
+  color: var(--chalk) !important;
 }
-.nav-dropdown .nav-dd-menu .nav-dd-icon {
-  width: 18px; height: 18px;
-  display: inline-flex; align-items: center; justify-content: center;
-  opacity: 0.85;
+.topbar nav .nav-dropdown .nav-dd-menu a.active {
+  color: var(--accent-soft) !important;
+  background: rgba(217,122,61,0.15) !important;
 }
 
-/* In mobile-open state the nav stacks vertically — make the dropdown menu
-   inline instead of absolute so it doesn't overlap. */
+/* Icon: fixed box so its SVG can't push the label down */
+.topbar nav .nav-dropdown .nav-dd-menu .nav-dd-icon {
+  width: 18px; height: 18px;
+  flex: 0 0 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.85;
+}
+.topbar nav .nav-dropdown .nav-dd-menu .nav-dd-icon svg {
+  width: 18px; height: 18px; display: block;
+}
+.topbar nav .nav-dropdown .nav-dd-menu a > span:last-child {
+  line-height: 1.2;
+}
+
+/* Mobile: nav stacks vertically — let the menu sit inline */
 @media (max-width: 760px) {
-  .topbar.mobile-open .nav-dropdown { width: 100%; }
-  .topbar.mobile-open .nav-dropdown .nav-dd-menu {
+  .topbar.mobile-open nav .nav-dropdown { width: 100%; }
+  .topbar.mobile-open nav .nav-dropdown .nav-dd-menu {
     position: static;
+    transform: none;
     border: none;
     box-shadow: none;
     padding: 4px 0 4px 18px;
     background: transparent;
+    min-width: 0;
   }
 }
 

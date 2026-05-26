@@ -56,13 +56,18 @@
  * page renders a friendly "not yet configured" notice instead of failing.
  */
 window.HEREDITA_CHAT_CONFIG = {
-  apiKey:            "PASTE_FROM_FIREBASE_HERE",
-  authDomain:        "your-project.firebaseapp.com",
-  databaseURL:       "https://your-project-default-rtdb.firebaseio.com",
-  projectId:         "your-project",
-  storageBucket:     "your-project.appspot.com",
-  messagingSenderId: "0000000000",
-  appId:             "1:0000000000:web:0000000000"
+  apiKey:            "AIzaSyAsKqOZr0Xc2tdof2ZvbNoXvo3qKNJyQmE",
+  authDomain:        "heredita-5f315.firebaseapp.com",
+  // Firebase doesn't show databaseURL in the modern "Add web app" snippet,
+  // but the Realtime Database SDK needs it. The URL is your project id
+  // suffixed with `-default-rtdb.firebaseio.com` (or `-default-rtdb.<region>`
+  // for non-us regions). Yours is in us-central1, so:
+  databaseURL:       "https://heredita-5f315-default-rtdb.firebaseio.com",
+  projectId:         "heredita-5f315",
+  storageBucket:     "heredita-5f315.firebasestorage.app",
+  messagingSenderId: "680751896623",
+  appId:             "1:680751896623:web:2a05a4fc3fc9b3b1a10eda",
+  measurementId:     "G-PJYGBFRHVS"
 };
 
 // Public rooms users can join. Add/remove freely.
