@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Heredita — Terms &amp; Conditions</title>
+  <title>Heredita — Chat</title>
   <link rel="icon" href="assets/heredita-icon.webp" type="image/webp" />
   <link rel="stylesheet" href="css/chalkboard.css" />
 </head>
@@ -12,7 +12,7 @@
   <header class="topbar">
     <div class="inner">
       <div class="topbar-left">
-        <a class="brand" href="home.html" aria-label="Heredita — Home">
+        <a class="brand" href="play.html" aria-label="Heredita — Play">
           <img src="assets/heredita-icon.webp" alt="" />
           <span class="brand-name">Heredita</span>
         </a>
@@ -49,41 +49,15 @@
     </div>
   </header>
 
-  <main class="container">
-    <section class="chalk-card tos-doc reveal" style="margin-top:24px;">
-      <h1 class="tilt-l" style="margin-top:0">Terms &amp; Conditions</h1>
-      <p class="muted">Last updated: 2026-05-24 — <em>placeholder document</em></p>
+  <main class="container" style="padding-top: 22px;">
+    <div class="section-title reveal">
+      <h1 class="tilt-l">Community Chat</h1>
+      <span class="muted">real-time, free, no download</span>
+    </div>
 
-      <p class="placeholder">
-        This is a placeholder. The real Terms &amp; Conditions for Heredita have not been written yet.
-        Nothing on this page is legally binding. Sections below exist only to reserve space.
-      </p>
-
-      <h2 class="tilt-r">1. Acceptance</h2>
-      <p class="placeholder">N/A — placeholder.</p>
-
-      <h2 class="tilt-l">2. Accounts &amp; eligibility</h2>
-      <p class="placeholder">N/A — placeholder. (Will cover minimum age, account ownership, account recovery.)</p>
-
-      <h2 class="tilt-r">3. Conduct</h2>
-      <p class="placeholder">N/A — placeholder. (Will cover harassment, spam, cheating, off-topic content.)</p>
-
-      <h2 class="tilt-l">4. User content &amp; intellectual property</h2>
-      <p class="placeholder">N/A — placeholder. (Will cover ownership of custom nations, flags, and timelines you create.)</p>
-
-      <h2 class="tilt-r">5. In-game currency (coming soon)</h2>
-      <p class="placeholder">N/A — placeholder. "Heredita Coins" do not exist yet and have no value.</p>
-
-      <h2 class="tilt-l">6. Disclaimers</h2>
-      <p class="placeholder">N/A — placeholder. The game is in early playtest; expect bugs.</p>
-
-      <h2 class="tilt-r">7. Contact</h2>
-      <p class="placeholder">N/A — placeholder contact: <em>tos-placeholder@heredita.net</em></p>
-
-      <p style="margin-top:28px;">
-        <a class="btn btn-ghost" href="index.html">← Back to sign in</a>
-      </p>
-    </section>
+    <div id="chatRoot" aria-live="polite">
+      <p class="muted text-center" style="padding: 30px 0;">Loading chat…</p>
+    </div>
   </main>
 
   <footer class="site-footer">
@@ -101,5 +75,7 @@
   <script src="js/app.js"></script>
   <script src="js/avatar.js"></script>
   <script src="js/social-nav.js"></script>
+  <script src="js/chat-config.js"></script>
+  <script type="module" src="js/chat.js"></script>
 </body>
 </html>

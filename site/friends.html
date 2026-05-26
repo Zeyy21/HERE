@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Heredita — Friends</title>
+  <link rel="icon" href="assets/heredita-icon.webp" type="image/webp" />
+  <link rel="stylesheet" href="css/chalkboard.css" />
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="inner">
+      <div class="topbar-left">
+        <a class="brand" href="play.html" aria-label="Heredita — Play">
+          <img src="assets/heredita-icon.webp" alt="" />
+          <span class="brand-name">Heredita</span>
+        </a>
+        <button class="nav-toggle" aria-label="Toggle navigation">Menu</button>
+        <nav aria-label="Primary" data-social-host>
+          <a href="home.html">Home</a>
+          <a href="play.html">Play</a>
+          <a href="store.html">Store</a>
+          <a href="avatar.html">Avatar</a>
+          <a href="updates.html">Updates</a>
+          <a href="about.html">About</a>
+        </nav>
+      </div>
+      <div class="topbar-right">
+        <div class="coin-chip" title="In-game currency — coming soon">
+          <span class="coin" aria-hidden="true"></span>
+          <span>0</span>
+          <span class="soon">coming soon</span>
+        </div>
+        <div class="user-chip">
+          <span class="avatar">G</span>
+          <div class="user-block">
+            <span class="name">Guest</span>
+            <a href="membership.html" class="tier-badge" data-tier="guest">Guest</a>
+          </div>
+        </div>
+        <a class="btn-icon" href="settings.html" aria-label="Settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" style="padding-top: 22px;">
+
+    <div class="section-title reveal">
+      <h1 class="tilt-l">Friends</h1>
+      <span class="muted">your roster</span>
+    </div>
+
+    <!-- Signed-out placeholder -->
+    <section id="guestGate" class="chalk-card reveal" hidden style="padding: 28px; text-align: center;">
+      <h2 class="tilt-r" style="margin-top: 0;">Sign in to manage friends</h2>
+      <p class="muted">Friends, friend requests and the player roster are only available with a real account. Guest sessions can still play and chat in public rooms.</p>
+      <div class="row" style="justify-content: center; gap: 10px;">
+        <a class="btn btn-primary" href="index.html">Sign in or sign up</a>
+        <a class="btn btn-ghost" href="chat.html">Open public chat</a>
+      </div>
+    </section>
+
+    <!-- Real UI -->
+    <section id="friendsApp" hidden>
+
+      <!-- Add by username -->
+      <div class="chalk-card reveal" style="padding: 18px;">
+        <h3 style="font-family:'Caveat',cursive; margin: 0 0 10px;">Add a friend</h3>
+        <form id="addForm" autocomplete="off" style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <input id="addUsername" type="text" required minlength="3" maxlength="32"
+                 placeholder="Exact username…"
+                 style="flex: 1; min-width: 220px; font-family:'Architects Daughter',cursive; font-size: 1rem; background: rgba(0,0,0,0.30); color: var(--chalk); border: 2px dashed rgba(244,241,230,0.45); border-radius: 10px; padding: 8px 12px;" />
+          <button type="submit" class="btn btn-primary">Send request</button>
+        </form>
+        <p class="muted" style="font-size: .9rem; margin: 8px 0 0;">
+          Type the player's <strong>exact</strong> username. If they exist, a friend request will be sent.
+        </p>
+      </div>
+
+      <!-- Tabs -->
+      <div class="auth-tabs reveal" role="tablist" aria-label="Friends sections" style="margin-top: 18px; max-width: 520px;">
+        <button class="active" data-fr-tab="friends">Friends <span class="muted" id="cntFriends">(0)</span></button>
+        <button data-fr-tab="incoming">Incoming <span class="muted" id="cntIncoming">(0)</span></button>
+        <button data-fr-tab="outgoing">Outgoing <span class="muted" id="cntOutgoing">(0)</span></button>
+      </div>
+
+      <section class="fr-panel reveal" data-fr-panel="friends">
+        <div id="friendsList" class="mode-grid" style="margin-top: 14px;"></div>
+        <p id="friendsEmpty" class="muted text-center" style="padding: 20px 0;" hidden>
+          No friends yet. Add someone above ↑
+        </p>
+      </section>
+
+      <section class="fr-panel reveal" data-fr-panel="incoming" hidden>
+        <div id="incomingList" class="mode-grid" style="margin-top: 14px;"></div>
+        <p id="incomingEmpty" class="muted text-center" style="padding: 20px 0;" hidden>
+          No incoming friend requests.
+        </p>
+      </section>
+
+      <section class="fr-panel reveal" data-fr-panel="outgoing" hidden>
+        <div id="outgoingList" class="mode-grid" style="margin-top: 14px;"></div>
+        <p id="outgoingEmpty" class="muted text-center" style="padding: 20px 0;" hidden>
+          No outgoing friend requests.
+        </p>
+      </section>
+
+    </section>
+
+    <!-- CORS / non-prod warning -->
+    <section id="corsGate" class="chalk-card reveal" hidden style="padding: 22px; margin-top: 18px;">
+      <h3 style="font-family:'Caveat',cursive; margin: 0 0 6px;">🛈 Friends API not reachable here</h3>
+      <p class="muted" style="margin: 0;">
+        The Heredita game API only accepts requests from <code style="color: var(--accent-soft);">heredita.net</code>.
+        Open this page on the production domain to manage friends.
+      </p>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-links">
+        <a href="about.html">About Us</a>
+        <a href="terms.html">Terms &amp; Conditions</a>
+        <a href="updates.html">Updates</a>
+      </div>
+      <div class="footer-meta">© 2026 Heredita — <span class="muted">heredita.net</span></div>
+    </div>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/avatar.js"></script>
+  <script src="js/social-nav.js"></script>
+  <script src="js/friends.js"></script>
+</body>
+</html>

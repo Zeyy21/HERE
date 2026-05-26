@@ -245,23 +245,28 @@
   }
 
   // ---------- reveal on scroll ----------
+  let _revealIO = null;
   function wireReveal() {
-    const els = $$('.reveal');
+    const els = $$('.reveal:not(.in)');
     if (!els.length) return;
     if (!('IntersectionObserver' in window)) {
       els.forEach(e => e.classList.add('in'));
       return;
     }
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach(en => {
-        if (en.isIntersecting) {
-          en.target.classList.add('in');
-          io.unobserve(en.target);
-        }
-      });
-    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
-    els.forEach(e => io.observe(e));
+    if (!_revealIO) {
+      _revealIO = new IntersectionObserver((entries) => {
+        entries.forEach(en => {
+          if (en.isIntersecting) {
+            en.target.classList.add('in');
+            _revealIO.unobserve(en.target);
+          }
+        });
+      }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+    }
+    els.forEach(e => _revealIO.observe(e));
   }
+  // Public hook so dynamically-injected cards can be picked up after fetch.
+  window.HereditaApp = Object.assign(window.HereditaApp || {}, { rewireReveal: wireReveal });
 
   // ---------- top nav (mobile) ----------
   function wireNavToggle() {

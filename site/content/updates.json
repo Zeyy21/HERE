@@ -1,0 +1,52 @@
+{
+  "updates": [
+    {
+      "version": "v0.4",
+      "date": "2026-05-18",
+      "title": "Loading screens, brush balancing, dice tweaks",
+      "tagline": "Map Pack",
+      "items": [
+        "**New:** 6 hand-drawn loading screens (Europe 1936, 1945, 1991, plus 3 alt-history maps).",
+        "**New:** \"Free Paint\" sandbox mode — no dice, no chat, just chalk.",
+        "**Balance:** brush size now caps at 13 (was 20) to discourage continent-wipes.",
+        "**Balance:** annexation dice now 2d6 instead of 1d12.",
+        "**Fix:** Poland chat no longer crashes when 4+ players spam \"I LOVE POLAND\"."
+      ]
+    },
+    {
+      "version": "v0.3",
+      "date": "2026-04-02",
+      "title": "Found your own country",
+      "tagline": "Custom Nations beta",
+      "items": [
+        "**New:** custom nation creator — flag, name, government, founding year.",
+        "**New:** place historical cities on the map (Constantinople, Carthage, etc.).",
+        "**Balance:** culture diffusion now rolls every 5 in-game years instead of every turn.",
+        "**Fix:** Whirling no longer renders behind the ocean tile."
+      ]
+    },
+    {
+      "version": "v0.2",
+      "date": "2026-02-14",
+      "title": "Talk to your neighbors before annexing them",
+      "tagline": "Chat & community drop",
+      "items": [
+        "**New:** in-game chat panel with player avatars.",
+        "**New:** \"communities\" — form subgroups inside a server.",
+        "**Fix:** calendar now actually advances (no more \"Calendar still soon™\")."
+      ]
+    },
+    {
+      "version": "v0.1",
+      "date": "2026-01-06",
+      "title": "It's alive",
+      "tagline": "First playable",
+      "items": [
+        "**New:** the map.",
+        "**New:** a brush.",
+        "**New:** a dice.",
+        "**Known issue:** everything else."
+      ]
+    }
+  ]
+}

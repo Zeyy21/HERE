@@ -1,0 +1,72 @@
+# Decap CMS configuration for Heredita.
+# This file is read by /admin/index.html on load.
+#
+# Backend = GitHub OAuth. Anyone listed as a collaborator on the GitHub repo
+# Zeyy21/HERE can sign in here and edit content. The OAuth handshake is
+# proxied through Netlify's free public OAuth gateway (api.netlify.com/auth)
+# so no client secret ever touches the browser.
+#
+# Setup checklist (one-time, ~10 min):
+#   1. Go to https://github.com/settings/applications/new
+#      - Application name:        Heredita CMS
+#      - Homepage URL:            https://heredita.net
+#      - Authorization callback:  https://api.netlify.com/auth/done
+#   2. Copy the generated Client ID into `client_id:` below.
+#   3. Go to https://app.netlify.com/ and create a free site (any name).
+#   4. In that site: Site settings -> Access & security -> OAuth ->
+#      "Install provider" -> GitHub -> paste your Client ID and Secret.
+#   5. (Optional) Configure your domain heredita.net to be the allowed
+#      redirect origin if Netlify asks.
+#   6. Save. Visit https://heredita.net/admin/ and click "Login with GitHub".
+
+backend:
+  name: github
+  repo: Zeyy21/HERE
+  branch: main
+  base_url: https://api.netlify.com
+  auth_endpoint: auth
+  # If you ever self-host an oauth proxy, set base_url/auth_endpoint to it.
+
+# Where Decap writes media uploads (we don't use any yet, but it's required).
+media_folder: "site/assets/uploads"
+public_folder: "/assets/uploads"
+
+# Show a banner so editors know this is the live admin.
+site_url: https://heredita.net
+display_url: https://heredita.net
+
+publish_mode: simple
+
+collections:
+  - name: updates
+    label: "Updates / Patch Notes"
+    label_singular: "Patch note"
+    description: >
+      Edit the entries shown on /updates.html. Each entry becomes one
+      chalkboard card on the page. Newest goes on top.
+    files:
+      - name: updates_file
+        label: "All patch notes"
+        file: "site/content/updates.json"
+        format: "json"
+        fields:
+          - name: updates
+            label: "Patch notes"
+            label_singular: "patch note"
+            widget: list
+            allow_add: true
+            collapsed: false
+            summary: "{{fields.version}} — {{fields.title}}"
+            fields:
+              - { name: version,  label: "Version tag (e.g. v0.4)", widget: string }
+              - { name: date,     label: "Date",                   widget: datetime, time_format: false, date_format: "YYYY-MM-DD", picker_utc: false }
+              - { name: tagline,  label: "Tagline (short suffix)",  widget: string, required: false }
+              - { name: title,    label: "Headline",               widget: string }
+              # Each bullet is a plain string in updates.json (no wrapper object).
+              # Decap's `field` (singular) on a list saves it as ["a","b"] when
+              # the inner widget produces a scalar value.
+              - name: items
+                label: "Bullet list"
+                widget: list
+                allow_add: true
+                field: { name: bullet, label: "Bullet (use **bold** for emphasis)", widget: text }

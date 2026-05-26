@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Heredita — Find Player</title>
+  <link rel="icon" href="assets/heredita-icon.webp" type="image/webp" />
+  <link rel="stylesheet" href="css/chalkboard.css" />
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="inner">
+      <div class="topbar-left">
+        <a class="brand" href="play.html" aria-label="Heredita — Play">
+          <img src="assets/heredita-icon.webp" alt="" />
+          <span class="brand-name">Heredita</span>
+        </a>
+        <button class="nav-toggle" aria-label="Toggle navigation">Menu</button>
+        <nav aria-label="Primary" data-social-host>
+          <a href="home.html">Home</a>
+          <a href="play.html">Play</a>
+          <a href="store.html">Store</a>
+          <a href="avatar.html">Avatar</a>
+          <a href="updates.html">Updates</a>
+          <a href="about.html">About</a>
+        </nav>
+      </div>
+      <div class="topbar-right">
+        <div class="coin-chip" title="In-game currency — coming soon">
+          <span class="coin" aria-hidden="true"></span>
+          <span>0</span>
+          <span class="soon">coming soon</span>
+        </div>
+        <div class="user-chip">
+          <span class="avatar">G</span>
+          <div class="user-block">
+            <span class="name">Guest</span>
+            <a href="membership.html" class="tier-badge" data-tier="guest">Guest</a>
+          </div>
+        </div>
+        <a class="btn-icon" href="settings.html" aria-label="Settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" style="padding-top: 22px;">
+
+    <div class="section-title reveal">
+      <h1 class="tilt-l">Find a Player</h1>
+      <span class="muted">search by exact username</span>
+    </div>
+
+    <section class="chalk-card reveal" style="padding: 22px;">
+      <form id="searchForm" autocomplete="off" style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <input id="searchInput" type="search" required minlength="3" maxlength="32"
+               placeholder="Type a player's exact username…"
+               style="flex: 1; min-width: 220px; font-family:'Architects Daughter',cursive; font-size: 1rem; background: rgba(0,0,0,0.30); color: var(--chalk); border: 2px dashed rgba(244,241,230,0.45); border-radius: 10px; padding: 10px 14px;" />
+        <button type="submit" class="btn btn-primary">Find &amp; add</button>
+      </form>
+      <p class="muted" style="font-size: .9rem; margin: 10px 0 0;">
+        Exact usernames only — the Heredita API does not yet expose fuzzy / partial search.
+        If the player exists, a friend request is sent immediately.
+      </p>
+    </section>
+
+    <!-- Result panel -->
+    <section id="resultPanel" class="reveal" style="margin-top: 18px;"></section>
+
+    <!-- Signed-out / CORS gates -->
+    <section id="guestGate" class="chalk-card reveal" hidden style="padding: 28px; text-align: center; margin-top: 18px;">
+      <h2 class="tilt-r" style="margin-top: 0;">Sign in to look people up</h2>
+      <p class="muted">Player search and friend requests require a real Heredita account.</p>
+      <a class="btn btn-primary" href="index.html">Sign in or sign up</a>
+    </section>
+
+    <section id="corsGate" class="chalk-card reveal" hidden style="padding: 22px; margin-top: 18px;">
+      <h3 style="font-family:'Caveat',cursive; margin: 0 0 6px;">🛈 Player API not reachable here</h3>
+      <p class="muted" style="margin: 0;">
+        The Heredita game API only accepts requests from <code style="color: var(--accent-soft);">heredita.net</code>.
+        Open this page on the production domain to search players.
+      </p>
+    </section>
+
+    <!-- Tips -->
+    <section class="chalk-card reveal" style="padding: 22px; margin-top: 22px;">
+      <h3 style="font-family:'Caveat',cursive; margin: 0 0 6px;">Tips</h3>
+      <ul style="margin: 0; padding-left: 22px;">
+        <li>Usernames are case-sensitive.</li>
+        <li>You can't friend yourself.</li>
+        <li>Once a request is sent, manage it from the <a href="friends.html">Friends page</a>.</li>
+      </ul>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-links">
+        <a href="about.html">About Us</a>
+        <a href="terms.html">Terms &amp; Conditions</a>
+        <a href="updates.html">Updates</a>
+      </div>
+      <div class="footer-meta">© 2026 Heredita — <span class="muted">heredita.net</span></div>
+    </div>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/avatar.js"></script>
+  <script src="js/social-nav.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const API = window.HereditaAPI;
+      const S   = window.HereditaSession;
+      const session = S && S.get();
+
+      const guestGate = document.getElementById('guestGate');
+      const corsGate  = document.getElementById('corsGate');
+      const form      = document.getElementById('searchForm');
+      const input     = document.getElementById('searchInput');
+      const result    = document.getElementById('resultPanel');
+
+      if (!session || !session.token || session.guest) {
+        guestGate.hidden = false;
+        form.querySelectorAll('input,button').forEach(el => el.disabled = true);
+        return;
+      }
+      if (API.isCorsBlockedOrigin()) {
+        corsGate.hidden = false;
+      }
+
+      function escapeHtml(s) {
+        return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
+          '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+        }[c]));
+      }
+      function setBusy(btn, busy, txt) {
+        if (busy) { btn._lbl = btn.textContent; btn.disabled = true; btn.textContent = txt || 'Working…'; }
+        else      { btn.disabled = false; if (btn._lbl) btn.textContent = btn._lbl; }
+      }
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const name = (input.value || '').trim();
+        if (!name) return;
+        if (name.toLowerCase() === (session.username || '').toLowerCase()) {
+          result.innerHTML = `<div class="chalk-card" style="padding: 22px;">
+            <p>That's <strong>you</strong>. Try searching for another player.</p>
+          </div>`;
+          return;
+        }
+        const btn = form.querySelector('button[type="submit"]');
+        setBusy(btn, true, 'Searching…');
+        result.innerHTML = `<div class="chalk-card" style="padding: 22px;">
+          <p class="muted">Looking up <strong>${escapeHtml(name)}</strong>…</p>
+        </div>`;
+
+        const r = await API.sendFriendRequest(session.token, name);
+        setBusy(btn, false);
+
+        if (r.ok) {
+          const initial = name.charAt(0).toUpperCase();
+          result.innerHTML = `
+            <article class="chalk-card" style="padding: 22px;">
+              <div class="row" style="gap: 14px; align-items: center;">
+                <span style="width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent-deep)); border: 2px solid var(--chalk); color: var(--board-3); display: inline-flex; align-items: center; justify-content: center; font-family: 'Caveat', cursive; font-weight: 700; font-size: 1.8rem;">${escapeHtml(initial)}</span>
+                <div style="flex: 1; min-width: 0;">
+                  <div style="font-family:'Caveat',cursive; font-size: 1.8rem; line-height: 1;">${escapeHtml(name)}</div>
+                  <div class="muted">✓ Player exists — friend request sent.</div>
+                </div>
+                <a class="btn btn-ghost" href="friends.html">View in Friends →</a>
+              </div>
+            </article>`;
+          input.value = '';
+          return;
+        }
+        // Distinguish "no such user" from other errors.
+        if (r.error === 'notfound') {
+          result.innerHTML = `<article class="chalk-card" style="padding: 22px;">
+            <h3 style="font-family:'Caveat',cursive; margin: 0 0 4px;">No player named <em>${escapeHtml(name)}</em></h3>
+            <p class="muted" style="margin: 0;">Usernames are case-sensitive. Double-check the spelling and try again.</p>
+          </article>`;
+          return;
+        }
+        if (r.error === 'cors') {
+          corsGate.hidden = false;
+        }
+        result.innerHTML = `<article class="chalk-card" style="padding: 22px;">
+          <h3 style="font-family:'Caveat',cursive; margin: 0 0 4px;">Couldn't complete that</h3>
+          <p class="muted" style="margin: 0;">${escapeHtml(r.message || 'Unknown error.')}</p>
+        </article>`;
+      });
+    });
+  </script>
+</body>
+</html>

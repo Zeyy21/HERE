@@ -17,7 +17,7 @@
           <span class="brand-name">Heredita</span>
         </a>
         <button class="nav-toggle" aria-label="Toggle navigation">Menu</button>
-        <nav aria-label="Primary">
+        <nav aria-label="Primary" data-social-host>
           <a href="home.html">Home</a>
           <a href="play.html">Play</a>
           <a href="store.html">Store</a>
@@ -55,68 +55,8 @@
       <span class="muted">what's new on the chalkboard</span>
     </div>
 
-    <div class="timeline">
-
-      <article class="chalk-card update-entry reveal delay-1">
-        <div class="meta">
-          <span class="version">v0.4</span>
-          <span class="date">May 18, 2026</span>
-          <span class="muted">— Hilmi's Map Pack</span>
-        </div>
-        <h2 class="tilt-r">Loading screens, brush balancing, dice tweaks</h2>
-        <ul>
-          <li><strong>New:</strong> 6 hand-drawn loading screens by Hilmi (Europe 1936, 1945, 1991, plus 3 alt-history maps).</li>
-          <li><strong>New:</strong> "Free Paint" sandbox mode — no dice, no chat, just chalk.</li>
-          <li><strong>Balance:</strong> brush size now caps at 13 (was 20) to discourage continent-wipes.</li>
-          <li><strong>Balance:</strong> annexation dice now 2d6 instead of 1d12.</li>
-          <li><strong>Fix:</strong> Poland chat no longer crashes when 4+ players spam "I LOVE POLAND".</li>
-        </ul>
-      </article>
-
-      <article class="chalk-card update-entry reveal delay-2">
-        <div class="meta">
-          <span class="version">v0.3</span>
-          <span class="date">April 2, 2026</span>
-          <span class="muted">— Custom Nations beta</span>
-        </div>
-        <h2 class="tilt-l">Found your own country</h2>
-        <ul>
-          <li><strong>New:</strong> custom nation creator — flag, name, government, founding year.</li>
-          <li><strong>New:</strong> place historical cities on the map (Constantinople, Carthage, etc.).</li>
-          <li><strong>Balance:</strong> culture diffusion now rolls every 5 in-game years instead of every turn.</li>
-          <li><strong>Fix:</strong> Whirling no longer renders behind the ocean tile.</li>
-        </ul>
-      </article>
-
-      <article class="chalk-card update-entry reveal delay-3">
-        <div class="meta">
-          <span class="version">v0.2</span>
-          <span class="date">February 14, 2026</span>
-          <span class="muted">— Chat &amp; community drop</span>
-        </div>
-        <h2 class="tilt-r">Talk to your neighbors before annexing them</h2>
-        <ul>
-          <li><strong>New:</strong> in-game chat panel with player avatars.</li>
-          <li><strong>New:</strong> "communities" — form subgroups inside a server.</li>
-          <li><strong>Fix:</strong> calendar now actually advances (no more "Calendar still soon™").</li>
-        </ul>
-      </article>
-
-      <article class="chalk-card update-entry reveal delay-4">
-        <div class="meta">
-          <span class="version">v0.1</span>
-          <span class="date">January 6, 2026</span>
-          <span class="muted">— First playable</span>
-        </div>
-        <h2 class="tilt-l">It's alive</h2>
-        <ul>
-          <li><strong>New:</strong> the map.</li>
-          <li><strong>New:</strong> a brush.</li>
-          <li><strong>New:</strong> a dice.</li>
-          <li><strong>Known issue:</strong> everything else.</li>
-        </ul>
-      </article>
-
+    <div id="updatesTimeline" class="timeline" aria-live="polite">
+      <p class="muted text-center" style="padding: 30px 0;">Loading patch notes…</p>
     </div>
 
     <p class="muted text-center" style="margin: 30px 0 10px;">
@@ -138,5 +78,73 @@
   <script src="js/api.js"></script>
   <script src="js/app.js"></script>
   <script src="js/avatar.js"></script>
+  <script src="js/social-nav.js"></script>
+  <script>
+    // Renders updates from /content/updates.json so the Decap CMS admin
+    // can edit them without touching markup.
+    (function () {
+      const TILT = ['tilt-r', 'tilt-l'];
+      const DELAYS = ['delay-1','delay-2','delay-3','delay-4'];
+
+      function escapeHtml(s) {
+        return String(s).replace(/[&<>"']/g, c => ({
+          '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+        }[c]));
+      }
+      // very small markdown-ish: **bold** + literal newlines
+      function inlineFormat(s) {
+        return escapeHtml(s).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+      }
+      function fmtDate(iso) {
+        try {
+          const d = new Date(iso);
+          if (isNaN(d)) return iso;
+          return d.toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+        } catch { return iso; }
+      }
+
+      async function loadUpdates() {
+        const container = document.getElementById('updatesTimeline');
+        try {
+          const res = await fetch('content/updates.json?t=' + Date.now(), { cache: 'no-store' });
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          const data = await res.json();
+          const list = (data && Array.isArray(data.updates)) ? data.updates : [];
+          if (!list.length) {
+            container.innerHTML = '<p class="muted text-center" style="padding: 30px 0;">No patch notes yet.</p>';
+            return;
+          }
+          container.innerHTML = list.map((u, i) => `
+            <article class="chalk-card update-entry reveal ${DELAYS[i % DELAYS.length]}">
+              <div class="meta">
+                <span class="version">${escapeHtml(u.version || '')}</span>
+                <span class="date">${escapeHtml(fmtDate(u.date || ''))}</span>
+                ${u.tagline ? `<span class="muted">— ${escapeHtml(u.tagline)}</span>` : ''}
+              </div>
+              <h2 class="${TILT[i % TILT.length]}">${escapeHtml(u.title || '')}</h2>
+              ${Array.isArray(u.items) && u.items.length
+                ? `<ul>${u.items.map(it => `<li>${inlineFormat(it)}</li>`).join('')}</ul>`
+                : ''}
+            </article>
+          `).join('');
+          // Re-apply scroll reveal to the freshly-injected cards
+          if (window.HereditaApp && typeof window.HereditaApp.rewireReveal === 'function') {
+            window.HereditaApp.rewireReveal();
+          } else {
+            // Fallback: just unhide them
+            container.querySelectorAll('.reveal').forEach(el => el.classList.add('in'));
+          }
+        } catch (err) {
+          console.error('[updates] failed to load', err);
+          container.innerHTML = `
+            <article class="chalk-card update-entry">
+              <h2 class="tilt-l">Couldn't load patch notes</h2>
+              <p class="muted">${escapeHtml(err.message || 'Unknown error')}. Try a hard refresh.</p>
+            </article>`;
+        }
+      }
+      document.addEventListener('DOMContentLoaded', loadUpdates);
+    })();
+  </script>
 </body>
 </html>

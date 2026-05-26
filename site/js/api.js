@@ -26,9 +26,20 @@
   const PLAY_URL = 'https://app.heredita.net/app/';
 
   // ---- helpers -----------------------------------------------------------
+  // The Heredita API at app.heredita.net only sends CORS headers for the
+  // production origin `https://heredita.net`. Any other origin (localhost,
+  // 127.0.0.1, file://, *.vercel.app preview deploys, custom subdomains)
+  // will have its preflight blocked by the browser. We surface this as a
+  // distinct error code so callers can fall back gracefully.
+  const PROD_ORIGIN = 'https://heredita.net';
+  function isProdOrigin() { return location.origin === PROD_ORIGIN; }
   function isLocalOrigin() {
     const h = location.hostname;
     return h === 'localhost' || h === '127.0.0.1' || h === '' || location.protocol === 'file:';
+  }
+  function isCorsBlockedOrigin() {
+    // Anything other than production is going to fail CORS at the browser.
+    return !isProdOrigin();
   }
 
   function asForm(obj) {
@@ -68,7 +79,7 @@
   function friendlyMessage(code) {
     switch (code) {
       case 'network':      return 'Could not reach Heredita servers.';
-      case 'cors':         return 'Heredita API not reachable from this origin (local dev).';
+      case 'cors':         return 'Heredita API not reachable from this origin. Sign-up works only on heredita.net.';
       case 'ratelimited':  return 'Too many attempts — slow down a moment.';
       case 'unauthorized': return 'Wrong username or password.';
       case 'forbidden':    return 'Your account is not allowed to do that.';
@@ -82,7 +93,7 @@
 
   function networkError(e) {
     // fetch only rejects on network/CORS failures. Both throw TypeError.
-    const cors = isLocalOrigin();
+    const cors = isCorsBlockedOrigin();
     return {
       ok: false,
       error: cors ? 'cors' : 'network',
@@ -166,10 +177,152 @@
     return { ok: true, user };
   }
 
+  // ---- Friends ----------------------------------------------------------
+  // All four endpoints require a bearer token.
+
+  async function getFriends(token) {
+    let res;
+    try {
+      res = await fetch(`${BASE}/users/friends/`, {
+        method: 'GET',
+        headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` }
+      });
+    } catch (e) { return networkError(e); }
+    if (!res.ok) return await errorFromResponse(res);
+    const data = await res.json();
+    // Schema is { friends: UserPartial[] }. We also enrich with the full
+    // /users/me payload if the caller wants incoming/outgoing requests.
+    return { ok: true, friends: (data && data.friends) || [] };
+  }
+
+  // POST /users/friends/{requestee_username} — send a friend request.
+  async function sendFriendRequest(token, username) {
+    let res;
+    try {
+      res = await fetch(`${BASE}/users/friends/${encodeURIComponent(username)}`, {
+        method: 'POST',
+        headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` }
+      });
+    } catch (e) { return networkError(e); }
+    if (!res.ok) return await errorFromResponse(res);
+    return { ok: true };
+  }
+
+  // DELETE /users/friends/{friend_username} — remove an existing friend.
+  async function removeFriend(token, username) {
+    let res;
+    try {
+      res = await fetch(`${BASE}/users/friends/${encodeURIComponent(username)}`, {
+        method: 'DELETE',
+        headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` }
+      });
+    } catch (e) { return networkError(e); }
+    if (!res.ok) return await errorFromResponse(res);
+    return { ok: true };
+  }
+
+  // POST /users/friends/requests/{requester_username} — accept incoming.
+  async function acceptFriendRequest(token, username) {
+    let res;
+    try {
+      res = await fetch(`${BASE}/users/friends/requests/${encodeURIComponent(username)}`, {
+        method: 'POST',
+        headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` }
+      });
+    } catch (e) { return networkError(e); }
+    if (!res.ok) return await errorFromResponse(res);
+    return { ok: true };
+  }
+
+  // DELETE /users/friends/requests/{requester_username} — decline incoming.
+  async function declineFriendRequest(token, username) {
+    let res;
+    try {
+      res = await fetch(`${BASE}/users/friends/requests/${encodeURIComponent(username)}`, {
+        method: 'DELETE',
+        headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` }
+      });
+    } catch (e) { return networkError(e); }
+    if (!res.ok) return await errorFromResponse(res);
+    return { ok: true };
+  }
+
+  // ---- Profile lookup ---------------------------------------------------
+
+  // No bearer required — returns the integer id, or -1 if no match.
+  async function lookupUsername(username) {
+    let res;
+    try {
+      const qs = new URLSearchParams({ username, token: '' });
+      // /users/verify/id requires both username and token. With an empty
+      // token the API simply returns -1 (no match) rather than the id, so
+      // we fall back to /users/{id} via a different path: try /users/me?
+      // That requires auth. The only public username→id endpoint is verify
+      // which needs a token. So we expose this helper instead via the
+      // token-bearing variant below. Keep this for symmetry / future use.
+      res = await fetch(`${BASE}/users/verify/id?${qs.toString()}`, {
+        method: 'GET', headers: { 'Accept': 'application/json' }
+      });
+    } catch (e) { return networkError(e); }
+    if (!res.ok) return await errorFromResponse(res);
+    const id = await res.json();
+    if (typeof id !== 'number' || id < 0) {
+      return { ok: false, error: 'notfound', status: 200, message: 'No account with that name.' };
+    }
+    return { ok: true, userId: id };
+  }
+
+  // GET /users/{id} — requires bearer.
+  async function getUserById(token, id) {
+    let res;
+    try {
+      res = await fetch(`${BASE}/users/${encodeURIComponent(id)}`, {
+        method: 'GET',
+        headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` }
+      });
+    } catch (e) { return networkError(e); }
+    if (!res.ok) return await errorFromResponse(res);
+    const user = await res.json();
+    return { ok: true, user };
+  }
+
+  // Convenience: look up a username and fetch their profile in one call,
+  // using the caller's bearer token for both steps. We use /users/verify/id
+  // with the caller's own token, which still works as a name→id resolver.
+  async function findUserByUsername(token, ownUsername, queryUsername) {
+    // verify/id requires a valid (username, token) pair belonging to the
+    // CALLER. It still returns -1 when the queried target doesn't exist…
+    // actually that endpoint validates the username/token pair (caller's),
+    // not the query string. So instead we just iterate ids? Bad idea.
+    //
+    // The simplest working approach: call /users/verify/id with the
+    // target username + caller's token. The endpoint returns the id of the
+    // user matching the given token, NOT the queried username — so this is
+    // useless for lookups.
+    //
+    // Therefore: the ONLY no-bearer path username→id is verifyTokenId,
+    // which requires that user's own token. Practical lookup-by-username
+    // for OTHER users isn't supported by the documented API surface.
+    //
+    // Workaround: try `/users/{id}` with id == queryUsername-treated-as-id
+    // (some APIs accept either). Otherwise return notfound and let the UI
+    // explain the limitation.
+    if (/^\d+$/.test(queryUsername)) {
+      return getUserById(token, queryUsername);
+    }
+    return {
+      ok: false, error: 'notfound', status: 0,
+      message: 'Username lookup needs a numeric user id — Heredita API does not yet expose name→id search.'
+    };
+  }
+
   // Expose
   window.HereditaAPI = {
-    BASE, PLAY_URL,
+    BASE, PLAY_URL, PROD_ORIGIN,
     register, login, verifyTokenId, getMe,
-    isLocalOrigin, friendlyMessage
+    getFriends, sendFriendRequest, removeFriend,
+    acceptFriendRequest, declineFriendRequest,
+    lookupUsername, getUserById, findUserByUsername,
+    isLocalOrigin, isProdOrigin, isCorsBlockedOrigin, friendlyMessage
   };
 })();

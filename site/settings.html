@@ -17,7 +17,7 @@
           <span class="brand-name">Heredita</span>
         </a>
         <button class="nav-toggle" aria-label="Toggle navigation">Menu</button>
-        <nav aria-label="Primary">
+        <nav aria-label="Primary" data-social-host>
           <a href="home.html">Home</a>
           <a href="play.html">Play</a>
           <a href="store.html">Store</a>
@@ -132,47 +132,6 @@
         </div>
       </section>
 
-      <!-- PREFERENCES -->
-      <section class="chalk-card settings-card reveal delay-4">
-        <h3>Preferences</h3>
-
-        <div class="settings-row">
-          <div class="label">
-            <span class="key">Chalk dust animation</span>
-            <span class="desc">Floating particles on the landing &amp; play pages.</span>
-          </div>
-          <label class="toggle">
-            <input id="prefDust" type="checkbox" checked />
-            <span class="track"></span>
-            <span class="thumb"></span>
-          </label>
-        </div>
-
-        <div class="settings-row">
-          <div class="label">
-            <span class="key">Reduced motion</span>
-            <span class="desc">Calmer transitions across the site.</span>
-          </div>
-          <label class="toggle">
-            <input id="prefMotion" type="checkbox" />
-            <span class="track"></span>
-            <span class="thumb"></span>
-          </label>
-        </div>
-
-        <div class="settings-row">
-          <div class="label">
-            <span class="key">Email me about updates</span>
-            <span class="desc">Patch notes &amp; tier launches.</span>
-          </div>
-          <label class="toggle">
-            <input id="prefMail" type="checkbox" />
-            <span class="track"></span>
-            <span class="thumb"></span>
-          </label>
-        </div>
-      </section>
-
     </div>
 
   </main>
@@ -191,6 +150,7 @@
   <script src="js/api.js"></script>
   <script src="js/app.js"></script>
   <script src="js/avatar.js"></script>
+  <script src="js/social-nav.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const S = window.HereditaSession;
@@ -283,28 +243,18 @@
         refreshAccount();
       }));
 
-      // ---- preferences (saved in localStorage)
+      // ---- language + region (persisted locally)
       const PREF_KEY = 'heredita.prefs';
       function getPrefs() {
-        try { return Object.assign({ dust: true, motion: false, mail: false, lang: 'en', region: 'Worldwide' }, JSON.parse(localStorage.getItem(PREF_KEY) || '{}')); }
-        catch { return { dust: true, motion: false, mail: false, lang: 'en', region: 'Worldwide' }; }
+        try { return Object.assign({ lang: 'en', region: 'Worldwide' }, JSON.parse(localStorage.getItem(PREF_KEY) || '{}')); }
+        catch { return { lang: 'en', region: 'Worldwide' }; }
       }
       function setPrefs(p) { localStorage.setItem(PREF_KEY, JSON.stringify(p)); }
 
       const prefs = getPrefs();
-      document.getElementById('prefDust').checked   = prefs.dust;
-      document.getElementById('prefMotion').checked = prefs.motion;
-      document.getElementById('prefMail').checked   = prefs.mail;
       document.getElementById('langSelect').value   = prefs.lang || 'en';
       document.getElementById('regionSelect').value = prefs.region || 'Worldwide';
 
-      ['prefDust','prefMotion','prefMail'].forEach(id => {
-        document.getElementById(id).addEventListener('change', (e) => {
-          const p = getPrefs();
-          p[id.replace('pref','').toLowerCase()] = e.target.checked;
-          setPrefs(p);
-        });
-      });
       document.getElementById('langSelect').addEventListener('change', (e) => {
         const p = getPrefs(); p.lang = e.target.value; setPrefs(p);
       });
