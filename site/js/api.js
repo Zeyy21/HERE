@@ -26,19 +26,24 @@
   const PLAY_URL = 'https://app.heredita.net/app/';
 
   // ---- helpers -----------------------------------------------------------
-  // The Heredita API at app.heredita.net only sends CORS headers for the
-  // production origin `https://heredita.net`. Any other origin (localhost,
-  // 127.0.0.1, file://, *.vercel.app preview deploys, custom subdomains)
-  // will have its preflight blocked by the browser. We surface this as a
-  // distinct error code so callers can fall back gracefully.
-  const PROD_ORIGIN = 'https://heredita.net';
-  function isProdOrigin() { return location.origin === PROD_ORIGIN; }
+  // The Heredita API at app.heredita.net sends CORS headers only for the
+  // origins whitelisted by the game backend. Today that's `heredita.net`.
+  // The site is currently served from `here-plum.vercel.app` (Vercel preview)
+  // until the heredita.net DNS is pointed at Vercel, so we ALSO recognise
+  // that origin — preflight will still fail until the backend whitelists it,
+  // but we'll surface a more accurate error.
+  const ALLOWED_ORIGINS = [
+    'https://heredita.net',
+    'https://www.heredita.net',
+    'https://here-plum.vercel.app'
+  ];
+  function isProdOrigin() { return ALLOWED_ORIGINS.includes(location.origin); }
   function isLocalOrigin() {
     const h = location.hostname;
     return h === 'localhost' || h === '127.0.0.1' || h === '' || location.protocol === 'file:';
   }
   function isCorsBlockedOrigin() {
-    // Anything other than production is going to fail CORS at the browser.
+    // Anything not on the allow-list is going to fail CORS at the browser.
     return !isProdOrigin();
   }
 
@@ -79,7 +84,7 @@
   function friendlyMessage(code) {
     switch (code) {
       case 'network':      return 'Could not reach Heredita servers.';
-      case 'cors':         return 'Heredita API not reachable from this origin. Sign-up works only on heredita.net.';
+      case 'cors':         return 'Heredita API not reachable from this origin. Ask the game team to whitelist this domain in their CORS list.';
       case 'ratelimited':  return 'Too many attempts — slow down a moment.';
       case 'unauthorized': return 'Wrong username or password.';
       case 'forbidden':    return 'Your account is not allowed to do that.';

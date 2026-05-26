@@ -26,8 +26,8 @@ backend:
 media_folder: "site/assets/uploads"
 public_folder: "/assets/uploads"
 
-site_url: https://heredita.net
-display_url: https://heredita.net
+site_url: https://here-plum.vercel.app
+display_url: https://here-plum.vercel.app
 
 publish_mode: simple
 
