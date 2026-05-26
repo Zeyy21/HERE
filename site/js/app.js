@@ -437,33 +437,59 @@
     if (signupForm) {
       signupForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        if (!tos.checked) { toast('Please agree to the Terms first.'); return; }
-        const fd = new FormData(signupForm);
-        const username = (fd.get('username') || '').toString().trim();
-        const dob      = (fd.get('dob') || '').toString();
-        const pw       = (fd.get('password') || '').toString();
-        const pw2      = (fd.get('confirm') || '').toString();
-        if (username.length < 3) return toast('Username must be 3+ characters.');
-        if (!dob)              return toast('Please enter your date of birth.');
-        if (pw.length < 6)     return toast('Password must be 6+ characters.');
-        if (pw !== pw2)        return toast('Passwords do not match.');
-
         const btn = signupForm.querySelector('button[type="submit"]');
-        setBusy(btn, true, 'Creating account…');
+        try {
+          if (!tos.checked) { toast('Please agree to the Terms first.'); return; }
+          const fd = new FormData(signupForm);
+          const username = (fd.get('username') || '').toString().trim();
+          const dob      = (fd.get('dob') || '').toString();
+          const pw       = (fd.get('password') || '').toString();
+          const pw2      = (fd.get('confirm') || '').toString();
+          if (username.length < 3) return toast('Username must be 3+ characters.');
+          if (!dob)              return toast('Please enter your date of birth.');
+          if (pw.length < 6)     return toast('Password must be 6+ characters.');
+          if (pw !== pw2)        return toast('Passwords do not match.');
 
-        const reg = await API.register(username, pw);
-        if (!reg.ok) {
-          if (reg.error === 'cors') { localMockLogin(username); return; }
+          setBusy(btn, true, 'Creating account…');
+          console.log('[heredita][auth] register start', { username });
+
+          const reg = await API.register(username, pw);
+          console.log('[heredita][auth] register result', reg);
+
+          if (!reg.ok) {
+            if (reg.error === 'cors' || reg.error === 'network') {
+              console.log('[heredita][auth] CORS/network → localMockLogin');
+              localMockLogin(username);
+              return;
+            }
+            if (reg.error === 'taken') {
+              toast('Username taken — try signing in instead.');
+              return;
+            }
+            toast(reg.message || 'Could not create account.');
+            return;
+          }
+
+          // Auto-login right after registering.
+          console.log('[heredita][auth] login start (post-register)');
+          const lg = await API.login(username, pw);
+          console.log('[heredita][auth] login result', lg);
+          if (!lg.ok) {
+            if (lg.error === 'cors' || lg.error === 'network') {
+              localMockLogin(username);
+              return;
+            }
+            toast('Account created but auto sign-in failed: ' + lg.message);
+            return;
+          }
+          await persistLoginAndGo(username, lg.token);
+        } catch (err) {
+          console.error('[heredita][auth] signup handler threw', err);
+          toast('Something went wrong. Try again.');
+        } finally {
+          // Always unstick the button — even if we're about to navigate.
           setBusy(btn, false);
-          return toast(reg.error === 'taken' ? 'Username is already taken.' : reg.message);
         }
-        // Auto-login right after registering.
-        const lg = await API.login(username, pw);
-        if (!lg.ok) {
-          setBusy(btn, false);
-          return toast('Account created but auto sign-in failed: ' + lg.message);
-        }
-        await persistLoginAndGo(username, lg.token);
       });
     }
 
@@ -473,21 +499,34 @@
     if (signinForm) {
       signinForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const fd = new FormData(signinForm);
-        const username = (fd.get('username') || '').toString().trim();
-        const pw       = (fd.get('password') || '').toString();
-        if (!username || !pw) return toast('Enter your credentials.');
-
         const btn = signinForm.querySelector('button[type="submit"]');
-        setBusy(btn, true, 'Signing in…');
+        try {
+          const fd = new FormData(signinForm);
+          const username = (fd.get('username') || '').toString().trim();
+          const pw       = (fd.get('password') || '').toString();
+          if (!username || !pw) return toast('Enter your credentials.');
 
-        const lg = await API.login(username, pw);
-        if (!lg.ok) {
-          if (lg.error === 'cors') { localMockLogin(username); return; }
+          setBusy(btn, true, 'Signing in…');
+          console.log('[heredita][auth] login start', { username });
+
+          const lg = await API.login(username, pw);
+          console.log('[heredita][auth] login result', lg);
+
+          if (!lg.ok) {
+            if (lg.error === 'cors' || lg.error === 'network') {
+              localMockLogin(username);
+              return;
+            }
+            toast(lg.message || 'Could not sign in.');
+            return;
+          }
+          await persistLoginAndGo(username, lg.token);
+        } catch (err) {
+          console.error('[heredita][auth] signin handler threw', err);
+          toast('Something went wrong. Try again.');
+        } finally {
           setBusy(btn, false);
-          return toast(lg.message);
         }
-        await persistLoginAndGo(username, lg.token);
       });
     }
 

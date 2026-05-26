@@ -99,13 +99,28 @@
   function networkError(e) {
     // fetch only rejects on network/CORS failures. Both throw TypeError.
     const cors = isCorsBlockedOrigin();
+    const code = (e && e.name === 'AbortError') ? 'network'
+               : (cors ? 'cors' : 'network');
+    console.warn('[heredita][api] fetch failed', { code, cors, name: e && e.name, msg: e && e.message });
     return {
       ok: false,
-      error: cors ? 'cors' : 'network',
+      error: code,
       status: 0,
-      message: friendlyMessage(cors ? 'cors' : 'network'),
+      message: friendlyMessage(code),
       cause: e && e.message
     };
+  }
+
+  // Wraps fetch with an 8-second hard timeout via AbortController, so no
+  // request can ever hang the UI. Returns the same response or throws.
+  async function fetchWithTimeout(url, init = {}, ms = 8000) {
+    const ctl = new AbortController();
+    const t = setTimeout(() => ctl.abort(), ms);
+    try {
+      return await fetch(url, Object.assign({}, init, { signal: ctl.signal }));
+    } finally {
+      clearTimeout(t);
+    }
   }
 
   // ---- API methods -------------------------------------------------------
@@ -116,7 +131,7 @@
     if (email) qs.set('email', email);
     let res;
     try {
-      res = await fetch(`${BASE}/auth/users/new?${qs.toString()}`, {
+      res = await fetchWithTimeout(`${BASE}/auth/users/new?${qs.toString()}`, {
         method: 'POST',
         headers: { 'Accept': 'application/json' }
       });
@@ -130,7 +145,7 @@
   async function login(username, password) {
     let res;
     try {
-      res = await fetch(`${BASE}/auth/token`, {
+      res = await fetchWithTimeout(`${BASE}/auth/token`, {
         method: 'POST',
         headers: {
           'Accept':       'application/json',
@@ -152,7 +167,7 @@
     let res;
     try {
       const qs = new URLSearchParams({ username, token });
-      res = await fetch(`${BASE}/users/verify/id?${qs.toString()}`, {
+      res = await fetchWithTimeout(`${BASE}/users/verify/id?${qs.toString()}`, {
         method: 'GET',
         headers: { 'Accept': 'application/json' }
       });
@@ -169,7 +184,7 @@
   async function getMe(token) {
     let res;
     try {
-      res = await fetch(`${BASE}/users/me`, {
+      res = await fetchWithTimeout(`${BASE}/users/me`, {
         method: 'GET',
         headers: {
           'Accept':        'application/json',
@@ -188,7 +203,7 @@
   async function getFriends(token) {
     let res;
     try {
-      res = await fetch(`${BASE}/users/friends/`, {
+      res = await fetchWithTimeout(`${BASE}/users/friends/`, {
         method: 'GET',
         headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` }
       });
@@ -204,7 +219,7 @@
   async function sendFriendRequest(token, username) {
     let res;
     try {
-      res = await fetch(`${BASE}/users/friends/${encodeURIComponent(username)}`, {
+      res = await fetchWithTimeout(`${BASE}/users/friends/${encodeURIComponent(username)}`, {
         method: 'POST',
         headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` }
       });
@@ -217,7 +232,7 @@
   async function removeFriend(token, username) {
     let res;
     try {
-      res = await fetch(`${BASE}/users/friends/${encodeURIComponent(username)}`, {
+      res = await fetchWithTimeout(`${BASE}/users/friends/${encodeURIComponent(username)}`, {
         method: 'DELETE',
         headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` }
       });
@@ -230,7 +245,7 @@
   async function acceptFriendRequest(token, username) {
     let res;
     try {
-      res = await fetch(`${BASE}/users/friends/requests/${encodeURIComponent(username)}`, {
+      res = await fetchWithTimeout(`${BASE}/users/friends/requests/${encodeURIComponent(username)}`, {
         method: 'POST',
         headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` }
       });
@@ -243,7 +258,7 @@
   async function declineFriendRequest(token, username) {
     let res;
     try {
-      res = await fetch(`${BASE}/users/friends/requests/${encodeURIComponent(username)}`, {
+      res = await fetchWithTimeout(`${BASE}/users/friends/requests/${encodeURIComponent(username)}`, {
         method: 'DELETE',
         headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` }
       });
@@ -265,7 +280,7 @@
       // That requires auth. The only public username→id endpoint is verify
       // which needs a token. So we expose this helper instead via the
       // token-bearing variant below. Keep this for symmetry / future use.
-      res = await fetch(`${BASE}/users/verify/id?${qs.toString()}`, {
+      res = await fetchWithTimeout(`${BASE}/users/verify/id?${qs.toString()}`, {
         method: 'GET', headers: { 'Accept': 'application/json' }
       });
     } catch (e) { return networkError(e); }
@@ -281,7 +296,7 @@
   async function getUserById(token, id) {
     let res;
     try {
-      res = await fetch(`${BASE}/users/${encodeURIComponent(id)}`, {
+      res = await fetchWithTimeout(`${BASE}/users/${encodeURIComponent(id)}`, {
         method: 'GET',
         headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` }
       });
