@@ -675,7 +675,7 @@ a:focus-visible { outline: 2px dashed var(--accent); outline-offset: 3px; border
 /* ============= Responsive ============= */
 @media (max-width: 760px) {
   body { font-size: 17px; }
-  .topbar .inner { padding: 10px 14px; gap: 8px; }
+  .topbar .inner { padding: 8px 12px; gap: 6px; }
   .topbar nav { display: none; }
   .topbar.mobile-open nav {
     display: flex; flex-direction: column; align-items: flex-start;
@@ -685,13 +685,58 @@ a:focus-visible { outline: 2px dashed var(--accent); outline-offset: 3px; border
     border-bottom: 2px dashed rgba(244,241,230,0.25);
   }
   .nav-toggle { display: inline-flex !important; }
+
+  /* Tighten the right cluster — much smaller chips + icon button */
+  .topbar .topbar-left  { gap: 8px; }
+  .topbar .topbar-right { gap: 6px; }
+  .topbar .topbar-right::before { display: none; }
+
+  .topbar .brand img { width: 32px; height: 32px; }
+  .topbar .brand .brand-name { font-size: 1.2rem; }
+
+  .coin-chip {
+    padding: 3px 8px;
+    font-size: 0.85rem;
+    border-width: 1.5px;
+    box-shadow: 0 2px 0 rgba(0,0,0,0.3);
+  }
+  .coin-chip .coin { width: 14px; height: 14px; }
   .coin-chip .soon { display: none; }
+
+  .user-chip {
+    padding: 3px 8px;
+    gap: 6px;
+    border-width: 1.5px;
+  }
+  .user-chip .avatar {
+    width: 22px; height: 22px;
+    font-size: 0.75rem;
+  }
+  .user-chip .avatar.countryball { width: 24px; height: 24px; }
+  .user-block .name { font-size: 0.95rem; }
+  .tier-badge { font-size: 0.75rem; padding: 0 6px; }
+
+  /* The settings gear was 38×38 on desktop — way too much on mobile. */
+  .btn-icon {
+    width: 30px; height: 30px;
+    border-width: 1.5px;
+  }
+  .btn-icon svg { width: 14px; height: 14px; }
+
   .hero-card { flex-direction: column; padding: 24px; }
   .hero-card .hero-art { width: 100%; flex: none; }
   .auth-card { padding: 20px; }
   .btn-huge { font-size: 2rem; padding: 22px 48px; }
   .site-footer .footer-inner { flex-direction: column; align-items: flex-start; gap: 8px; }
   .site-footer .footer-meta { margin-left: 0; }
+}
+
+/* Even tighter for very narrow screens */
+@media (max-width: 420px) {
+  .topbar .inner { padding: 6px 10px; gap: 4px; }
+  .topbar .brand .brand-name { display: none; }
+  .coin-chip { padding: 2px 7px; }
+  .user-block .name { max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 }
 
 .nav-toggle {
@@ -1554,9 +1599,19 @@ a.chalk-card:active,
 /* ============================================================
    TOPBAR — split into left (brand + nav) and right (account)
    ============================================================ */
+.topbar .inner {
+  display: flex;
+  align-items: center;
+  /* hard split: left cluster pushes right, right cluster pinned to far right */
+  justify-content: space-between;
+  gap: 24px;
+}
 .topbar .topbar-left,
 .topbar .topbar-right {
-  display: flex; align-items: center; gap: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: nowrap;
 }
 .topbar .topbar-left  { flex: 1 1 auto; min-width: 0; }
 .topbar .topbar-right { flex: 0 0 auto; }
