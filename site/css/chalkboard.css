@@ -1962,127 +1962,149 @@ a.chalk-card:active,
 }
 
 /* ============================================================
-   SOCIAL DROPDOWN — injected into every topbar by social-nav.js
-   High-specificity selectors so the topbar's own `nav a` styles
-   (small padding, chalk underline) don't bleed into the menu.
+   SOCIAL POPOVER — body-attached chalkboard panel
+   Toggle lives in the topbar nav; the menu itself is appended to
+   <body> by JS (position: fixed) so it escapes the topbar's flex
+   cascade and can never collide with surrounding link styles.
    ============================================================ */
-.topbar nav .nav-dropdown {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-}
 
-/* The "Social ▾" toggle — sized to match sibling nav links */
-.topbar nav .nav-dropdown > .nav-dd-toggle {
+/* Toggle button inside the nav — styled to match sibling links */
+.topbar nav .social-toggle {
   background: transparent;
   border: none;
   color: var(--chalk-soft);
   font-family: 'Architects Daughter', cursive;
   font-size: 1.05rem;
-  padding: 6px 10px;
+  padding: 6px 12px;
   border-radius: 8px;
   cursor: pointer;
   letter-spacing: 0.2px;
   line-height: 1.4;
   display: inline-flex;
   align-items: center;
-  gap: 2px;
+  gap: 6px;
+  position: relative;
+  transition: background .15s ease, color .15s ease;
 }
-.topbar nav .nav-dropdown > .nav-dd-toggle:hover,
-.topbar nav .nav-dropdown.open > .nav-dd-toggle,
-.topbar nav .nav-dropdown > .nav-dd-toggle.active {
-  background: rgba(244,241,230,0.08);
+.topbar nav .social-toggle:hover,
+.topbar nav .social-toggle[aria-expanded="true"],
+.topbar nav .social-toggle.has-active {
+  background: rgba(244,241,230,0.10);
   color: var(--chalk);
 }
-.topbar nav .nav-dropdown > .nav-dd-toggle .caret {
-  display: inline-block;
-  margin-left: 4px;
-  font-size: 0.75em;
-  transition: transform .2s;
-  line-height: 1;
+.topbar nav .social-toggle .caret {
+  width: 10px; height: 10px;
+  flex: 0 0 10px;
+  transition: transform .25s cubic-bezier(.2,.7,.2,1);
 }
-.topbar nav .nav-dropdown.open > .nav-dd-toggle .caret { transform: rotate(180deg); }
-
-/* The popout panel itself */
-.topbar nav .nav-dropdown .nav-dd-menu {
-  position: absolute;
-  top: calc(100% + 8px);
-  left: 50%;
-  transform: translateX(-50%);
-  min-width: 200px;
-  background: rgba(10,22,15,0.98);
-  border: 2px dashed rgba(244,241,230,0.45);
-  border-radius: 12px;
-  padding: 8px;
-  display: none;
-  flex-direction: column;
-  gap: 2px;
-  z-index: 50;
-  box-shadow: 0 14px 32px rgba(0,0,0,0.6);
+.topbar nav .social-toggle[aria-expanded="true"] .caret {
+  transform: rotate(180deg);
 }
-.topbar nav .nav-dropdown.open .nav-dd-menu { display: flex; }
-
-/* Items inside the panel — explicitly override the topbar's `nav a`
-   styles (font-size, padding, underline animation, vertical layout). */
-.topbar nav .nav-dropdown .nav-dd-menu a {
-  display: flex !important;
-  flex-direction: row !important;
-  align-items: center !important;
-  gap: 10px !important;
-  padding: 8px 12px !important;
-  margin: 0 !important;
-  font-family: 'Architects Daughter', cursive !important;
-  font-size: 1.05rem !important;
-  color: var(--chalk-soft) !important;
-  text-decoration: none !important;
-  border: none !important;
-  border-radius: 8px !important;
-  line-height: 1.2 !important;
-  white-space: nowrap;
-}
-/* Kill the chalk-underline animation that `.topbar nav a::after` adds */
-.topbar nav .nav-dropdown .nav-dd-menu a::after,
-.topbar nav .nav-dropdown .nav-dd-menu a::before {
+/* Hide the chalk-underline ::after that .topbar nav a uses */
+.topbar nav .social-toggle::after,
+.topbar nav .social-toggle::before {
   content: none !important;
   display: none !important;
 }
-.topbar nav .nav-dropdown .nav-dd-menu a:hover {
-  background: rgba(244,241,230,0.10) !important;
-  color: var(--chalk) !important;
+
+/* The popover panel — lives directly under <body> */
+.social-popover {
+  position: fixed;
+  top: 0; left: 0;
+  min-width: 220px;
+  background: linear-gradient(180deg, rgba(15,32,24,0.985), rgba(10,22,15,0.985));
+  border: 2.5px dashed rgba(244,241,230,0.55);
+  border-radius: 14px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  z-index: 1000;
+  box-shadow:
+    0 0 0 1px rgba(244,241,230,0.08),
+    0 18px 38px rgba(0,0,0,0.65),
+    0 0 24px rgba(217,122,61,0.10);
+  /* enter animation */
+  opacity: 0;
+  transform: translateY(-6px) scale(0.96);
+  transform-origin: top center;
+  pointer-events: none;
+  transition: opacity .18s ease, transform .22s cubic-bezier(.2,.7,.2,1);
 }
-.topbar nav .nav-dropdown .nav-dd-menu a.active {
-  color: var(--accent-soft) !important;
-  background: rgba(217,122,61,0.15) !important;
+.social-popover.open {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
 }
 
-/* Icon: fixed box so its SVG can't push the label down */
-.topbar nav .nav-dropdown .nav-dd-menu .nav-dd-icon {
-  width: 18px; height: 18px;
-  flex: 0 0 18px;
+/* Little chalk-arrow notch pointing back at the toggle */
+.social-popover::before {
+  content: "";
+  position: absolute;
+  top: -8px;
+  left: var(--arrow-x, 50%);
+  transform: translateX(-50%) rotate(45deg);
+  width: 12px; height: 12px;
+  background: rgba(15,32,24,0.99);
+  border-left: 2.5px dashed rgba(244,241,230,0.55);
+  border-top: 2.5px dashed rgba(244,241,230,0.55);
+  border-top-left-radius: 3px;
+}
+
+/* Items */
+.social-popover a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  font-family: 'Architects Daughter', cursive;
+  font-size: 1.05rem;
+  color: var(--chalk-soft);
+  text-decoration: none;
+  border: 1.5px dashed transparent;
+  border-radius: 10px;
+  line-height: 1.2;
+  white-space: nowrap;
+  transition: background .15s ease, color .15s ease, border-color .15s ease, transform .15s ease;
+}
+.social-popover a:hover,
+.social-popover a:focus-visible {
+  background: rgba(244,241,230,0.08);
+  color: var(--chalk);
+  border-color: rgba(244,241,230,0.30);
+  outline: none;
+  transform: translateX(2px);
+}
+.social-popover a.active {
+  color: var(--accent-soft);
+  background: rgba(217,122,61,0.16);
+  border-color: var(--accent);
+  border-style: solid;
+}
+.social-popover .sp-icon {
+  width: 20px; height: 20px;
+  flex: 0 0 20px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  opacity: 0.85;
+  color: currentColor;
+  opacity: 0.9;
 }
-.topbar nav .nav-dropdown .nav-dd-menu .nav-dd-icon svg {
-  width: 18px; height: 18px; display: block;
-}
-.topbar nav .nav-dropdown .nav-dd-menu a > span:last-child {
-  line-height: 1.2;
+.social-popover .sp-icon svg { width: 20px; height: 20px; display: block; }
+.social-popover .sp-label { flex: 1; min-width: 0; }
+.social-popover .sp-sub {
+  display: block;
+  font-size: .8rem;
+  color: var(--chalk-faded);
+  font-family: 'Architects Daughter', cursive;
+  margin-top: 1px;
+  line-height: 1.1;
 }
 
-/* Mobile: nav stacks vertically — let the menu sit inline */
-@media (max-width: 760px) {
-  .topbar.mobile-open nav .nav-dropdown { width: 100%; }
-  .topbar.mobile-open nav .nav-dropdown .nav-dd-menu {
-    position: static;
-    transform: none;
-    border: none;
-    box-shadow: none;
-    padding: 4px 0 4px 18px;
-    background: transparent;
-    min-width: 0;
-  }
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .social-popover { transition: opacity .1s ease; transform: none; }
+  .social-popover.open { transform: none; }
 }
 
 /* ============================================================
