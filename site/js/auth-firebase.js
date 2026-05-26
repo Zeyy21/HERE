@@ -103,7 +103,7 @@
   function _normalizeError(e) {
     const code = (e && e.code) || '';
     const map = {
-      'auth/email-already-in-use':   { error: 'taken',            message: 'That email is already registered. Try signing in.' },
+      'auth/email-already-in-use':   { error: 'taken',            message: 'An account with that email already exists. Switch to the Sign in tab.' },
       'auth/invalid-email':          { error: 'invalid-email',    message: 'That email address looks wrong.' },
       'auth/weak-password':          { error: 'weak-password',    message: 'Password must be at least 6 characters.' },
       'auth/user-not-found':         { error: 'not-found',        message: 'No account with that email or username.' },
@@ -167,43 +167,70 @@
     if (!password || password.length < 6)
       return { ok: false, error: 'weak-password', message: 'Password must be 6+ characters.' };
 
-    // Pre-check username uniqueness
-    if (await _usernameTaken(username)) {
-      return { ok: false, error: 'taken', message: 'That username is already taken.' };
-    }
-
+    // CRITICAL PATH: just create the Firebase Auth user. That's all we need
+    // for sign-in to work cross-device. Firestore writes for username
+    // uniqueness + profile happen as BEST-EFFORT in the background so a
+    // flaky Firestore connection doesn't block signup.
     let cred;
     try {
       cred = await _authm.createUserWithEmailAndPassword(_auth, email, password);
     } catch (e) {
       return _normalizeError(e);
     }
-    const uid = cred.user.uid;
 
-    // Reserve username + write profile in parallel.
+    // Set displayName on the Auth user immediately. This always works
+    // because it's a pure Auth call, no Firestore dependency.
     try {
-      await Promise.all([
-        _fsm.setDoc(_fsm.doc(_db, 'usernames', _normUsername(username)), { uid }),
-        _fsm.setDoc(_fsm.doc(_db, 'users', uid), {
-          username,
-          displayName: username,
-          email,
-          dob: dob || null,
-          tier: 'regular',
-          createdAt: _fsm.serverTimestamp()
-        })
-      ]);
-      try {
-        await _authm.updateProfile(cred.user, { displayName: username });
-      } catch (_) {}
+      await _authm.updateProfile(cred.user, { displayName: username });
     } catch (e) {
-      console.error('[heredita][auth] profile write failed', e);
-      // Roll back the auth account so the user can retry cleanly.
-      try { await _authm.deleteUser(cred.user); } catch (_) {}
-      return { ok: false, error: 'unknown', message: 'Sign-up partially failed — try again.' };
+      console.warn('[heredita][auth] updateProfile failed (non-fatal)', e && e.code);
     }
-    _profileCache = await _loadProfile(cred.user);
+
+    // Build the profile we return RIGHT NOW so the UI can proceed.
+    _profileCache = {
+      uid: cred.user.uid,
+      email: cred.user.email || email,
+      username,
+      displayName: username
+    };
+
+    // Best-effort Firestore writes — fire-and-forget so signup completes
+    // immediately. Failures are logged but don't block the user.
+    _writeProfileBestEffort(cred.user.uid, { username, email, dob, tier: 'regular' });
+
     return { ok: true, user: _profileCache };
+  }
+
+  // Try the Firestore writes a few times in the background. If Firestore is
+  // unavailable, we just log and move on — the user can sign in / use the
+  // site without these writes succeeding immediately.
+  function _writeProfileBestEffort(uid, profile) {
+    const usernameKey = _normUsername(profile.username);
+    const profileDoc = {
+      username: profile.username,
+      displayName: profile.username,
+      email: profile.email,
+      dob: profile.dob || null,
+      tier: profile.tier || 'regular',
+      createdAt: _fsm.serverTimestamp()
+    };
+    const attempt = async (n) => {
+      try {
+        await Promise.all([
+          _fsm.setDoc(_fsm.doc(_db, 'usernames', usernameKey), { uid }),
+          _fsm.setDoc(_fsm.doc(_db, 'users', uid), profileDoc)
+        ]);
+        console.log('[heredita][auth] profile saved to Firestore', { uid, attempt: n });
+      } catch (e) {
+        console.warn(`[heredita][auth] profile write attempt ${n} failed`, e && e.code);
+        if (n < 3) {
+          setTimeout(() => attempt(n + 1), 1500 * n);
+        } else {
+          console.warn('[heredita][auth] gave up writing profile to Firestore (will retry next sign-in).');
+        }
+      }
+    };
+    attempt(1);
   }
 
   async function signIn({ emailOrUsername, password }) {
@@ -212,15 +239,31 @@
     if (!id || !password) return { ok: false, error: 'invalid', message: 'Enter your credentials.' };
 
     // If it doesn't look like an email, treat it as a username and resolve.
+    // If Firestore is unavailable, tell the user to sign in with email.
     let email = id;
     if (!id.includes('@')) {
       const resolved = await _resolveUsernameToEmail(id);
-      if (!resolved) return { ok: false, error: 'not-found', message: 'No account with that username.' };
+      if (!resolved) {
+        return {
+          ok: false,
+          error: 'not-found',
+          message: 'No account with that username. Try signing in with your email instead.'
+        };
+      }
       email = resolved;
     }
     try {
       const cred = await _authm.signInWithEmailAndPassword(_auth, email, password);
       _profileCache = await _loadProfile(cred.user);
+      // If the profile doc didn't exist (sign-up's Firestore write failed
+      // previously), retry it now in the background.
+      if (_profileCache && _profileCache.username) {
+        _writeProfileBestEffort(cred.user.uid, {
+          username: _profileCache.username,
+          email: _profileCache.email,
+          tier: 'regular'
+        });
+      }
       return { ok: true, user: _profileCache };
     } catch (e) {
       return _normalizeError(e);
