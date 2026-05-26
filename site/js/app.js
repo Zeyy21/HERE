@@ -388,36 +388,23 @@
     }
     if (tos) { tos.addEventListener('change', syncGate); syncGate(); }
 
-    // helpers
-    const API = window.HereditaAPI;
+    // Auth backend = Firebase (cloud, cross-device). The game API is no
+    // longer used for sign-up/sign-in on the website.
+    const FAUTH = window.HereditaAuth;
 
-    async function persistLoginAndGo(username, token) {
-      // Pull rank from /users/me so we can store it. Best-effort — if it fails,
-      // we still keep the session (the token alone is enough for the game).
-      let rank = 'player', userId = null;
-      try {
-        const me = await API.getMe(token);
-        if (me.ok) { rank = me.user.rank || 'player'; userId = me.user.id; }
-      } catch (_) {}
+    function persistAndGo(profile) {
+      // profile = { uid, email, username, displayName } from Firebase
       setSession({
-        username,
-        token,
-        userId,
-        rank,
+        uid: profile.uid,
+        username: profile.username,
+        email: profile.email,
         guest: false,
         tier: 'regular',
         coins: 0
       });
       renderUserChip();
-      toast('Welcome, ' + username + '!');
+      toast('Welcome, ' + profile.username + '!');
       setTimeout(() => location.href = 'home.html', 500);
-    }
-
-    // Local-dev fallback when CORS blocks calls from localhost
-    function localMockLogin(username) {
-      setSession({ username, guest: false, tier: 'regular', coins: 0 });
-      toast('(local dev) Signed in without API — CORS blocks heredita.net only.');
-      setTimeout(() => location.href = 'home.html', 700);
     }
 
     function setBusy(btn, busy, busyText) {
@@ -442,59 +429,40 @@
           if (!tos.checked) { toast('Please agree to the Terms first.'); return; }
           const fd = new FormData(signupForm);
           const username = (fd.get('username') || '').toString().trim();
+          const email    = (fd.get('email') || '').toString().trim();
           const dob      = (fd.get('dob') || '').toString();
           const pw       = (fd.get('password') || '').toString();
           const pw2      = (fd.get('confirm') || '').toString();
           if (username.length < 3) return toast('Username must be 3+ characters.');
+          if (!email)            return toast('Please enter your email.');
           if (!dob)              return toast('Please enter your date of birth.');
           if (pw.length < 6)     return toast('Password must be 6+ characters.');
           if (pw !== pw2)        return toast('Passwords do not match.');
 
+          if (!FAUTH) {
+            toast('Auth backend not loaded — refresh the page.');
+            return;
+          }
+
           setBusy(btn, true, 'Creating account…');
-          console.log('[heredita][auth] register start', { username });
-
-          const reg = await API.register(username, pw);
-          console.log('[heredita][auth] register result', reg);
-
-          if (!reg.ok) {
-            if (reg.error === 'cors' || reg.error === 'network') {
-              console.log('[heredita][auth] CORS/network → localMockLogin');
-              localMockLogin(username);
-              return;
-            }
-            if (reg.error === 'taken') {
-              toast('Username taken — try signing in instead.');
-              return;
-            }
-            toast(reg.message || 'Could not create account.');
+          console.log('[heredita][auth] firebase signUp', { username, email });
+          const r = await FAUTH.signUp({ email, username, dob, password: pw });
+          console.log('[heredita][auth] firebase signUp result', r);
+          if (!r.ok) {
+            toast(r.message || 'Could not create account.');
             return;
           }
-
-          // Auto-login right after registering.
-          console.log('[heredita][auth] login start (post-register)');
-          const lg = await API.login(username, pw);
-          console.log('[heredita][auth] login result', lg);
-          if (!lg.ok) {
-            if (lg.error === 'cors' || lg.error === 'network') {
-              localMockLogin(username);
-              return;
-            }
-            toast('Account created but auto sign-in failed: ' + lg.message);
-            return;
-          }
-          await persistLoginAndGo(username, lg.token);
+          persistAndGo(r.user);
         } catch (err) {
           console.error('[heredita][auth] signup handler threw', err);
           toast('Something went wrong. Try again.');
         } finally {
-          // Always unstick the button — even if we're about to navigate.
           setBusy(btn, false);
         }
       });
     }
 
     // ---- sign in ----
-    // Existing accounts: no T&C re-check (they agreed at signup).
     const signinForm = $('#signinForm');
     if (signinForm) {
       signinForm.addEventListener('submit', async (e) => {
@@ -502,25 +470,24 @@
         const btn = signinForm.querySelector('button[type="submit"]');
         try {
           const fd = new FormData(signinForm);
-          const username = (fd.get('username') || '').toString().trim();
-          const pw       = (fd.get('password') || '').toString();
-          if (!username || !pw) return toast('Enter your credentials.');
+          const emailOrUsername = (fd.get('username') || '').toString().trim();
+          const pw              = (fd.get('password') || '').toString();
+          if (!emailOrUsername || !pw) return toast('Enter your credentials.');
 
-          setBusy(btn, true, 'Signing in…');
-          console.log('[heredita][auth] login start', { username });
-
-          const lg = await API.login(username, pw);
-          console.log('[heredita][auth] login result', lg);
-
-          if (!lg.ok) {
-            if (lg.error === 'cors' || lg.error === 'network') {
-              localMockLogin(username);
-              return;
-            }
-            toast(lg.message || 'Could not sign in.');
+          if (!FAUTH) {
+            toast('Auth backend not loaded — refresh the page.');
             return;
           }
-          await persistLoginAndGo(username, lg.token);
+
+          setBusy(btn, true, 'Signing in…');
+          console.log('[heredita][auth] firebase signIn', { id: emailOrUsername });
+          const r = await FAUTH.signIn({ emailOrUsername, password: pw });
+          console.log('[heredita][auth] firebase signIn result', r);
+          if (!r.ok) {
+            toast(r.message || 'Could not sign in.');
+            return;
+          }
+          persistAndGo(r.user);
         } catch (err) {
           console.error('[heredita][auth] signin handler threw', err);
           toast('Something went wrong. Try again.');
@@ -656,21 +623,34 @@
     }
   }
 
-  // ---- Verify stored token is still valid on the API.
-  // Async, non-blocking. If invalid, clear the session and rerender the chip.
-  async function verifyStoredToken() {
-    const API = window.HereditaAPI;
-    if (!API) return;
-    const s = getSession();
-    if (!s || !s.token || !s.username) return;
-    const v = await API.verifyTokenId(s.username, s.token);
-    if (v.ok) return;
-    if (v.error === 'cors' || v.error === 'network') return; // don't punish offline
-    // Token is gone — wipe credentials but keep username for UX.
-    const cleaned = { username: s.username, guest: true, tier: 'guest', coins: 0 };
-    setSession(cleaned);
-    renderUserChip();
-    toast('Your session expired — please sign in again.');
+  // ---- Sync session with Firebase Auth state.
+  // If Firebase says we have a signed-in user, mirror that into our local
+  // session object. If Firebase says we're signed out but we have a stale
+  // signed-in session, demote to guest. Cross-device sign-out works the
+  // same way: open the site on device A after signing out on device B,
+  // and a few seconds later the local session updates.
+  function wireFirebaseAuthSync() {
+    const FA = window.HereditaAuth;
+    if (!FA) return;
+    FA.onChange((profile) => {
+      const s = getSession();
+      if (profile) {
+        // Signed in (cloud). Merge into local session.
+        const merged = Object.assign({}, s || {}, {
+          uid: profile.uid,
+          username: profile.username,
+          email: profile.email,
+          guest: false,
+          tier: (s && s.tier) || 'regular'
+        });
+        setSession(merged);
+        renderUserChip();
+      } else if (s && !s.guest && s.uid) {
+        // Was signed in, Firebase now says no — clean up.
+        clearSession();
+        renderUserChip();
+      }
+    });
   }
 
   // ---------- init ----------
@@ -678,8 +658,7 @@
     sanitizeStoredTier();
     applyFreeHatIfEligible();
     wireNavToggle();
-    // fire-and-forget; the page renders immediately, this just cleans stale tokens
-    verifyStoredToken();
+    wireFirebaseAuthSync();
     wirePlayCtas();
     wireAuthPage();
     wireHomePage();

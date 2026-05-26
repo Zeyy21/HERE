@@ -6,7 +6,7 @@
   <title>Heredita — Roleplay the World</title>
   <meta name="description" content="Heredita is a roleplay geopolitical simulator. Paint the map, roll the dice, rewrite history." />
   <link rel="icon" href="assets/heredita-icon.webp" type="image/webp" />
-  <link rel="stylesheet" href="css/chalkboard.css?v=20260525-6" />
+  <link rel="stylesheet" href="css/chalkboard.css?v=20260525-7" />
 </head>
 <body class="with-dust">
 
@@ -27,7 +27,14 @@
         <div class="field">
           <label for="su-username">Username</label>
           <input id="su-username" name="username" type="text" autocomplete="username"
-                 placeholder="e.g. CountDookuEnjoyer" minlength="3" maxlength="20" required />
+                 placeholder="e.g. CountDookuEnjoyer" minlength="3" maxlength="20"
+                 pattern="[A-Za-z0-9_.\-]+" required />
+        </div>
+
+        <div class="field">
+          <label for="su-email">Email</label>
+          <input id="su-email" name="email" type="email" autocomplete="email"
+                 placeholder="you@example.com" required />
         </div>
 
         <div class="field">
@@ -62,7 +69,7 @@
       <!-- SIGN IN — existing accounts only, no T&C gate -->
       <form id="signinForm" class="auth-panel" data-panel="signin" hidden novalidate>
         <div class="field">
-          <label for="si-username">Username</label>
+          <label for="si-username">Email or username</label>
           <input id="si-username" name="username" type="text" autocomplete="username" required />
         </div>
         <div class="field">
@@ -95,9 +102,7 @@
     </div>
   </footer>
 
-  <!-- Netlify Identity widget — only runs if the URL contains an invite/recovery
-       hash (sent by Netlify in emails). Otherwise it's a tiny no-op.
-       The Identity service is invite-only, so no public signup tab. -->
+  <!-- Netlify Identity (invite-only admin login flow) -->
   <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
   <script>
     if (window.netlifyIdentity) {
@@ -108,7 +113,6 @@
           });
         }
       });
-      // Hide the signup tab in the Identity modal (invite-only admin).
       const s = document.createElement('style');
       s.textContent = `
         #netlify-identity-widget button[data-cy="signup"],
@@ -122,7 +126,11 @@
     }
   </script>
 
-  <script src="js/api.js?v=20260525-6"></script>
-  <script src="js/app.js?v=20260525-6"></script>
+  <!-- Firebase Auth (chat-config holds the Firebase project credentials) -->
+  <script src="js/chat-config.js?v=20260525-7"></script>
+  <script type="module" src="js/auth-firebase.js?v=20260525-7"></script>
+
+  <script src="js/api.js?v=20260525-7"></script>
+  <script src="js/app.js?v=20260525-7"></script>
 </body>
 </html>
