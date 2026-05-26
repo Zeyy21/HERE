@@ -6,11 +6,16 @@
   <meta name="robots" content="noindex, nofollow" />
   <title>Heredita — Admin</title>
   <link rel="icon" href="../assets/heredita-icon.webp" type="image/webp" />
+
+  <!-- Tell Decap to load its config from an ABSOLUTE path. Without this,
+       Decap loads `./config.yml`, which fails when Vercel's cleanUrls strips
+       /admin/ → /admin (so `./config.yml` resolves to /config.yml → 404). -->
+  <link rel="cms-config-url" type="text/yaml" href="/admin/config.yml" />
 </head>
 <body>
   <!--
     Decap CMS admin.
-    - Reads schema from /admin/config.yml
+    - Reads schema from /admin/config.yml (absolute path; see <link> above)
     - Uses Netlify Identity widget for sign-in (free, no GitHub OAuth app needed)
     - Uses Git Gateway to commit content changes to Zeyy21/HERE on GitHub
     Unlinked from the rest of the site; bookmark /admin/ to reach it.
@@ -18,9 +23,6 @@
   <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
   <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
   <script>
-    // If a Netlify Identity invite or recovery hash is present in the URL,
-    // bounce to the site root so the widget there can handle it. Otherwise
-    // when the user finishes signing in, send them right back to /admin/.
     if (window.netlifyIdentity) {
       window.netlifyIdentity.on('init', user => {
         if (!user) {
