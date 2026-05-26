@@ -58,35 +58,26 @@
       return;
     }
 
-    // ---- Load Firebase ESM SDK from CDN. Done at runtime so the page works
-    // without any build step. We only need three modules.
-    let fb, dbm, authm;
+    // ---- Load Firebase ESM SDK from CDN. We only need app + database now;
+    // the website's Supabase login is the source of identity, and the
+    // Firebase rules allow open writes from any client to /rooms/*.
+    let fb, dbm;
     try {
-      fb    = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js');
-      dbm   = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js');
-      authm = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js');
+      fb  = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js');
+      dbm = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js');
     } catch (e) {
       console.error('[chat] firebase SDK load failed', e);
       renderError('Could not load the chat SDK. Check your network and try again.');
       return;
     }
 
-    let app, db, auth;
+    let app, db;
     try {
-      app  = fb.initializeApp(cfg);
-      db   = dbm.getDatabase(app);
-      auth = authm.getAuth(app);
+      app = fb.initializeApp(cfg);
+      db  = dbm.getDatabase(app);
     } catch (e) {
       console.error('[chat] firebase init failed', e);
       renderError('Chat backend rejected the configuration. Double-check js/chat-config.js.');
-      return;
-    }
-
-    try {
-      await authm.signInAnonymously(auth);
-    } catch (e) {
-      console.error('[chat] anonymous auth failed', e);
-      renderError('Anonymous sign-in is disabled. Enable it in Firebase Console → Authentication.');
       return;
     }
 
