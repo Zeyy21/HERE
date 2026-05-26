@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Heredita — Find Player</title>
   <link rel="icon" href="assets/heredita-icon.webp" type="image/webp" />
-  <link rel="stylesheet" href="css/chalkboard.css?v=20260525-10" />
+  <link rel="stylesheet" href="css/chalkboard.css?v=20260525-11" />
 </head>
 <body>
 
@@ -79,12 +79,15 @@
       <a class="btn btn-primary" href="index.html">Sign in or sign up</a>
     </section>
 
-    <section id="corsGate" class="chalk-card reveal" hidden style="padding: 22px; margin-top: 18px;">
-      <h3 style="font-family:'Caveat',cursive; margin: 0 0 6px;">🛈 Player API not reachable here</h3>
-      <p class="muted" style="margin: 0;">
-        The Heredita game API only accepts requests from <code style="color: var(--accent-soft);">heredita.net</code>.
-        Open this page on the production domain to search players.
+    <section id="corsGate" class="chalk-card reveal" hidden style="padding: 28px; text-align: center; margin-top: 18px;">
+      <h2 class="tilt-r" style="margin-top: 0;">Player search arrives with the real launch</h2>
+      <p class="muted" style="max-width: 56ch; margin: 0 auto 12px;">
+        Player lookup lives on the Heredita game backend at
+        <code style="color: var(--accent-soft);">app.heredita.net</code>, which currently only accepts
+        requests from <code style="color: var(--accent-soft);">heredita.net</code>.
+        Once that DNS points at this site, search will work automatically.
       </p>
+      <p class="muted" style="font-size: .9rem;">Meanwhile, you can <a href="chat.html">chat</a> or customize your <a href="avatar.html">avatar</a>.</p>
     </section>
 
     <!-- Tips -->
@@ -110,18 +113,17 @@
     </div>
   </footer>
 
-  <script src="js/api.js?v=20260525-10"></script>
-  <script src="js/app.js?v=20260525-10"></script>
-  <script src="js/chat-config.js?v=20260525-10"></script>
-  <script src="js/auth-config.js?v=20260525-10"></script>
-  <script src="js/auth-supabase.js?v=20260525-10"></script>
-  <script src="js/avatar.js?v=20260525-10"></script>
-  <script src="js/social-nav.js?v=20260525-10"></script>
+  <script src="js/api.js?v=20260525-11"></script>
+  <script src="js/app.js?v=20260525-11"></script>
+  <script src="js/chat-config.js?v=20260525-11"></script>
+  <script src="js/auth-config.js?v=20260525-11"></script>
+  <script src="js/auth-supabase.js?v=20260525-11"></script>
+  <script src="js/avatar.js?v=20260525-11"></script>
+  <script src="js/social-nav.js?v=20260525-11"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
       const API = window.HereditaAPI;
       const S   = window.HereditaSession;
-      const session = S && S.get();
 
       const guestGate = document.getElementById('guestGate');
       const corsGate  = document.getElementById('corsGate');
@@ -129,13 +131,23 @@
       const input     = document.getElementById('searchInput');
       const result    = document.getElementById('resultPanel');
 
-      if (!session || !session.token || session.guest) {
+      // Wait for Supabase to hydrate any existing session before deciding.
+      if (window.HereditaAuth && window.HereditaAuth.ready) {
+        try { await window.HereditaAuth.ready(); } catch (_) {}
+      }
+      const session = S && S.get();
+
+      if (!S.isSignedIn()) {
         guestGate.hidden = false;
         form.querySelectorAll('input,button').forEach(el => el.disabled = true);
         return;
       }
+      // The player API lives on app.heredita.net and currently only accepts
+      // requests from heredita.net. Until DNS flips, search can't work.
       if (API.isCorsBlockedOrigin()) {
         corsGate.hidden = false;
+        form.querySelectorAll('input,button').forEach(el => el.disabled = true);
+        return;
       }
 
       function escapeHtml(s) {

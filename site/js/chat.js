@@ -37,12 +37,16 @@
   document.addEventListener('DOMContentLoaded', boot);
 
   async function boot() {
+    // Wait for Supabase to hydrate so we don't flash the "sign in" gate to
+    // an already-signed-in user.
+    if (window.HereditaAuth && window.HereditaAuth.ready) {
+      try { await window.HereditaAuth.ready(); } catch (_) {}
+    }
     const session = S && S.get();
 
     // ---- Chat is for signed-in members only. Guests + signed-out users
     // see a clear gate explaining why.
-    const hasAccount = session && session.username && !session.guest;
-    if (!hasAccount) {
+    if (!S.isSignedIn()) {
       renderSignInGate(!!(session && session.guest));
       return;
     }

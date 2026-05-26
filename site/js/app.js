@@ -31,6 +31,14 @@
   function setSession(s) { localStorage.setItem(SESSION_KEY, JSON.stringify(s)); }
   function clearSession() { localStorage.removeItem(SESSION_KEY); }
 
+  // ---- Sign-in detection: a session counts as "signed in" if it has a
+  // uid (set by Supabase) and isn't flagged as guest. Tokens are no longer
+  // stored locally (Supabase handles them in its own storage). ----
+  function isSignedIn() {
+    const s = getSession();
+    return !!(s && s.uid && !s.guest && s.username);
+  }
+
   // ---- Tier helpers ----
   const TIER_LABEL = { guest: 'Guest', regular: 'Regular', emperor: 'Emperor' };
   // Emperor is paid — locked until paid release ships.
@@ -167,10 +175,10 @@
     document.body.appendChild(modal);
   }
 
-  // expose for other modules (avatar.js, settings page, membership)
+  // expose for other modules (avatar.js, settings page, membership, friends, chat)
   window.HereditaSession = {
     get: getSession, set: setSession, clear: clearSession,
-    getTier, setTier, canSwitchTier, isTierPaid,
+    getTier, setTier, canSwitchTier, isTierPaid, isSignedIn,
     openPaywall, openTierGate, TIER_LABEL
   };
   // Back-compat shim: anything still calling `isTierLocked` now means "paid".
@@ -644,16 +652,23 @@
     }
   }
 
-  // ---- Sync session with the cloud auth provider (Supabase).
-  // If the cloud says we have a signed-in user, mirror into our local
-  // session object. If the cloud says we're signed out but we have a stale
-  // signed-in session, demote to guest.
+  // ---- Sync local session with the cloud auth provider (Supabase).
+  // Important race condition: HereditaAuth.onChange fires SYNCHRONOUSLY
+  // once with the current cached profile (which is `null` before async
+  // init completes). We must NOT use that initial null to clobber a stored
+  // signed-in session — otherwise the user appears as "Guest" until Supabase
+  // finishes hydrating. We wait until ready() resolves before trusting any
+  // null event to mean "signed out".
   function wireFirebaseAuthSync() {
     const FA = window.HereditaAuth;
     if (!FA) return;
+    let initDone = false;
+    FA.ready().then(() => { initDone = true; });
+
     FA.onChange((profile) => {
       const s = getSession();
       if (profile) {
+        // Signed in (cloud) — mirror into local session.
         const merged = Object.assign({}, s || {}, {
           uid: profile.id || profile.uid,
           username: profile.username,
@@ -663,7 +678,13 @@
         });
         setSession(merged);
         renderUserChip();
-      } else if (s && !s.guest && s.uid) {
+        return;
+      }
+      // profile === null:
+      //   - Before init done: don't trust it (could be the initial sync fire)
+      //   - After init done with a stored signed-in session: it's a real sign-out
+      if (!initDone) return;
+      if (s && !s.guest && s.uid) {
         clearSession();
         renderUserChip();
       }

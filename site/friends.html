@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Heredita — Friends</title>
   <link rel="icon" href="assets/heredita-icon.webp" type="image/webp" />
-  <link rel="stylesheet" href="css/chalkboard.css?v=20260525-10" />
+  <link rel="stylesheet" href="css/chalkboard.css?v=20260525-11" />
 </head>
 <body>
 
@@ -114,12 +114,19 @@
     </section>
 
     <!-- CORS / non-prod warning -->
-    <section id="corsGate" class="chalk-card reveal" hidden style="padding: 22px; margin-top: 18px;">
-      <h3 style="font-family:'Caveat',cursive; margin: 0 0 6px;">🛈 Friends API not reachable here</h3>
-      <p class="muted" style="margin: 0;">
-        The Heredita game API only accepts requests from <code style="color: var(--accent-soft);">heredita.net</code>.
-        Open this page on the production domain to manage friends.
+    <section id="corsGate" class="chalk-card reveal" hidden style="padding: 28px; text-align: center; margin-top: 18px;">
+      <h2 class="tilt-r" style="margin-top: 0;">Friends arrive with the real launch</h2>
+      <p class="muted" style="max-width: 56ch; margin: 0 auto 12px;">
+        The friends roster lives on the Heredita game backend at
+        <code style="color: var(--accent-soft);">app.heredita.net</code>, which currently only accepts
+        requests from <code style="color: var(--accent-soft);">heredita.net</code>.
+        Once that DNS points at this site, friends will work automatically — no code change needed.
       </p>
+      <p class="muted" style="font-size: .9rem;">Chat, avatar, store browsing and membership work fine today.</p>
+      <div class="row" style="justify-content: center; gap: 10px; margin-top: 12px;">
+        <a class="btn btn-primary" href="chat.html">Open chat instead</a>
+        <a class="btn btn-ghost" href="home.html">Back to home</a>
+      </div>
     </section>
 
   </main>
@@ -135,13 +142,13 @@
     </div>
   </footer>
 
-  <script src="js/api.js?v=20260525-10"></script>
-  <script src="js/app.js?v=20260525-10"></script>
-  <script src="js/chat-config.js?v=20260525-10"></script>
-  <script src="js/auth-config.js?v=20260525-10"></script>
-  <script src="js/auth-supabase.js?v=20260525-10"></script>
-  <script src="js/avatar.js?v=20260525-10"></script>
-  <script src="js/social-nav.js?v=20260525-10"></script>
-  <script src="js/friends.js?v=20260525-10"></script>
+  <script src="js/api.js?v=20260525-11"></script>
+  <script src="js/app.js?v=20260525-11"></script>
+  <script src="js/chat-config.js?v=20260525-11"></script>
+  <script src="js/auth-config.js?v=20260525-11"></script>
+  <script src="js/auth-supabase.js?v=20260525-11"></script>
+  <script src="js/avatar.js?v=20260525-11"></script>
+  <script src="js/social-nav.js?v=20260525-11"></script>
+  <script src="js/friends.js?v=20260525-11"></script>
 </body>
 </html>
