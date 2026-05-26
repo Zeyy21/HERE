@@ -1,0 +1,16 @@
+{
+  "rules": {
+    "rooms": {
+      "$room": {
+        ".read": true,
+        ".write": "auth != null",
+        "messages": {
+          ".indexOn": ["ts"],
+          "$mid": {
+            ".validate": "newData.hasChildren(['from','text','ts']) && newData.child('text').isString() && newData.child('text').val().length <= 800 && newData.child('from').isString() && newData.child('from').val().length <= 32"
+          }
+        }
+      }
+    }
+  }
+}

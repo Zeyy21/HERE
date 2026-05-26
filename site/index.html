@@ -95,6 +95,21 @@
     </div>
   </footer>
 
+  <!-- Netlify Identity widget — only runs if the URL contains an invite/recovery
+       hash (sent by Netlify in emails). Otherwise it's a tiny no-op. -->
+  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+  <script>
+    if (window.netlifyIdentity) {
+      window.netlifyIdentity.on('init', user => {
+        if (!user) {
+          window.netlifyIdentity.on('login', () => {
+            document.location.href = '/admin/';
+          });
+        }
+      });
+    }
+  </script>
+
   <script src="js/api.js?v=20260525-2"></script>
   <script src="js/app.js?v=20260525-2"></script>
 </body>

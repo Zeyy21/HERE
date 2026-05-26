@@ -1,37 +1,31 @@
 # Decap CMS configuration for Heredita.
-# This file is read by /admin/index.html on load.
 #
-# Backend = GitHub OAuth. Anyone listed as a collaborator on the GitHub repo
-# Zeyy21/HERE can sign in here and edit content. The OAuth handshake is
-# proxied through Netlify's free public OAuth gateway (api.netlify.com/auth)
-# so no client secret ever touches the browser.
+# Backend = Netlify Git Gateway. Decap auths via Netlify Identity (no
+# GitHub OAuth app to register, no client_id to copy). Edits are committed
+# back to the Zeyy21/HERE GitHub repo by the Git Gateway service.
 #
-# Setup checklist (one-time, ~10 min):
-#   1. Go to https://github.com/settings/applications/new
-#      - Application name:        Heredita CMS
-#      - Homepage URL:            https://heredita.net
-#      - Authorization callback:  https://api.netlify.com/auth/done
-#   2. Copy the generated Client ID into `client_id:` below.
-#   3. Go to https://app.netlify.com/ and create a free site (any name).
-#   4. In that site: Site settings -> Access & security -> OAuth ->
-#      "Install provider" -> GitHub -> paste your Client ID and Secret.
-#   5. (Optional) Configure your domain heredita.net to be the allowed
-#      redirect origin if Netlify asks.
-#   6. Save. Visit https://heredita.net/admin/ and click "Login with GitHub".
+# One-time setup (~2 minutes), using `netlify-cli`:
+#   1.  npm install -g netlify-cli
+#   2.  netlify login
+#   3.  netlify init           (link to this folder; create a new Netlify site)
+#   4.  netlify open:admin     (opens the dashboard)
+#   5.  In the dashboard:
+#       - Integrations → Identity → Enable Identity
+#       - Identity → Services → Enable Git Gateway
+#       - Identity → Invite users → invite your own email → accept invite
+#   6.  Visit https://heredita.net/admin/ and sign in with that email.
+#
+# After that, every "Publish" in Decap commits to GitHub and triggers a
+# Vercel rebuild, so updates appear on every visitor's next page load.
 
 backend:
-  name: github
-  repo: Zeyy21/HERE
+  name: git-gateway
   branch: main
-  base_url: https://api.netlify.com
-  auth_endpoint: auth
-  # If you ever self-host an oauth proxy, set base_url/auth_endpoint to it.
 
 # Where Decap writes media uploads (we don't use any yet, but it's required).
 media_folder: "site/assets/uploads"
 public_folder: "/assets/uploads"
 
-# Show a banner so editors know this is the live admin.
 site_url: https://heredita.net
 display_url: https://heredita.net
 
@@ -62,9 +56,7 @@ collections:
               - { name: date,     label: "Date",                   widget: datetime, time_format: false, date_format: "YYYY-MM-DD", picker_utc: false }
               - { name: tagline,  label: "Tagline (short suffix)",  widget: string, required: false }
               - { name: title,    label: "Headline",               widget: string }
-              # Each bullet is a plain string in updates.json (no wrapper object).
-              # Decap's `field` (singular) on a list saves it as ["a","b"] when
-              # the inner widget produces a scalar value.
+              # Each bullet is a plain string in updates.json.
               - name: items
                 label: "Bullet list"
                 widget: list
