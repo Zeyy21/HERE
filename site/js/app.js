@@ -393,9 +393,9 @@
     const FAUTH = window.HereditaAuth;
 
     function persistAndGo(profile) {
-      // profile = { uid, email, username, displayName } from Firebase
+      // profile = { id|uid, email, username, displayName } from auth provider
       setSession({
-        uid: profile.uid,
+        uid: profile.id || profile.uid,
         username: profile.username,
         email: profile.email,
         guest: false,
@@ -453,11 +453,24 @@
           }
 
           setBusy(btn, true, 'Creating account…');
-          console.log('[heredita][auth] firebase signUp', { username, email });
+          console.log('[heredita][auth] signUp', { username, email });
           const r = await FAUTH.signUp({ email, username, dob, password: pw });
-          console.log('[heredita][auth] firebase signUp result', r);
+          console.log('[heredita][auth] signUp result', r);
           if (!r.ok) {
             toast(r.message || 'Could not create account.');
+            return;
+          }
+          // If email confirmation is required, the user isn't signed in yet.
+          if (r.needsConfirm) {
+            toast('✓ Check your email — we sent a confirmation link to ' + email + '.', 5000);
+            // Show a clearer in-place message; switch to Sign in tab so they
+            // can come back and log in once they've clicked the link.
+            setTimeout(() => {
+              const tab = document.querySelector('[data-tab="signin"]');
+              if (tab) tab.click();
+              const si = document.getElementById('si-username');
+              if (si) si.value = email;
+            }, 1200);
             return;
           }
           persistAndGo(r.user);
@@ -631,21 +644,18 @@
     }
   }
 
-  // ---- Sync session with Firebase Auth state.
-  // If Firebase says we have a signed-in user, mirror that into our local
-  // session object. If Firebase says we're signed out but we have a stale
-  // signed-in session, demote to guest. Cross-device sign-out works the
-  // same way: open the site on device A after signing out on device B,
-  // and a few seconds later the local session updates.
+  // ---- Sync session with the cloud auth provider (Supabase).
+  // If the cloud says we have a signed-in user, mirror into our local
+  // session object. If the cloud says we're signed out but we have a stale
+  // signed-in session, demote to guest.
   function wireFirebaseAuthSync() {
     const FA = window.HereditaAuth;
     if (!FA) return;
     FA.onChange((profile) => {
       const s = getSession();
       if (profile) {
-        // Signed in (cloud). Merge into local session.
         const merged = Object.assign({}, s || {}, {
-          uid: profile.uid,
+          uid: profile.id || profile.uid,
           username: profile.username,
           email: profile.email,
           guest: false,
@@ -654,7 +664,6 @@
         setSession(merged);
         renderUserChip();
       } else if (s && !s.guest && s.uid) {
-        // Was signed in, Firebase now says no — clean up.
         clearSession();
         renderUserChip();
       }
