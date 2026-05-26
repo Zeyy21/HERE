@@ -6,7 +6,7 @@
   <title>Heredita — Roleplay the World</title>
   <meta name="description" content="Heredita is a roleplay geopolitical simulator. Paint the map, roll the dice, rewrite history." />
   <link rel="icon" href="assets/heredita-icon.webp" type="image/webp" />
-  <link rel="stylesheet" href="css/chalkboard.css?v=20260525-3" />
+  <link rel="stylesheet" href="css/chalkboard.css?v=20260525-4" />
 </head>
 <body class="with-dust">
 
@@ -96,7 +96,8 @@
   </footer>
 
   <!-- Netlify Identity widget — only runs if the URL contains an invite/recovery
-       hash (sent by Netlify in emails). Otherwise it's a tiny no-op. -->
+       hash (sent by Netlify in emails). Otherwise it's a tiny no-op.
+       The Identity service is invite-only, so no public signup tab. -->
   <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
   <script>
     if (window.netlifyIdentity) {
@@ -107,10 +108,21 @@
           });
         }
       });
+      // Hide the signup tab in the Identity modal (invite-only admin).
+      const s = document.createElement('style');
+      s.textContent = `
+        #netlify-identity-widget button[data-cy="signup"],
+        #netlify-identity-widget .btnSignup,
+        #netlify-identity-widget a[data-cy="signup-link"],
+        #netlify-identity-widget [class*="signupLink"] {
+          display: none !important;
+        }
+      `;
+      document.head.appendChild(s);
     }
   </script>
 
-  <script src="js/api.js?v=20260525-3"></script>
-  <script src="js/app.js?v=20260525-3"></script>
+  <script src="js/api.js?v=20260525-4"></script>
+  <script src="js/app.js?v=20260525-4"></script>
 </body>
 </html>

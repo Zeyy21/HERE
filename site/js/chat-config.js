@@ -70,10 +70,7 @@ window.HEREDITA_CHAT_CONFIG = {
   measurementId:     "G-PJYGBFRHVS"
 };
 
-// Public rooms users can join. Add/remove freely.
+// Public rooms users can join. Add more freely — only "General" for now.
 window.HEREDITA_CHAT_ROOMS = [
-  { id: 'town-square', name: 'Town Square',    blurb: 'The main lobby. Anyone, any topic.' },
-  { id: 'strategy',    name: 'Strategy',       blurb: 'Tactics, diplomacy, alliances.' },
-  { id: 'history',     name: 'History Buffs',  blurb: 'Real-world events, dates, debates.' },
-  { id: 'off-topic',   name: 'Off-Topic',      blurb: 'Whatever you want.' }
+  { id: 'general', name: 'General', blurb: 'The main lobby. Anyone, any topic.' }
 ];

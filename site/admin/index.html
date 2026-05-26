@@ -14,23 +14,51 @@
 </head>
 <body>
   <!--
-    Decap CMS admin.
-    - Reads schema from /admin/config.yml (absolute path; see <link> above)
-    - Uses Netlify Identity widget for sign-in (free, no GitHub OAuth app needed)
-    - Uses Git Gateway to commit content changes to Zeyy21/HERE on GitHub
+    Decap CMS admin (dev/owner-only, invite-only).
+    - Schema:  /admin/config.yml
+    - Auth:    Netlify Identity (invite-only, NO public sign-up)
+    - Backend: Netlify Git Gateway → commits to Zeyy21/HERE on GitHub
     Unlinked from the rest of the site; bookmark /admin/ to reach it.
   -->
   <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
   <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
   <script>
     if (window.netlifyIdentity) {
+      // Hide the "Sign up" tab — this admin is invite-only. The Identity
+      // service should ALSO be set to "Invite only" in the Netlify dashboard
+      // (Site configuration → Identity → Registration preferences) so even
+      // a forged signup request gets rejected on the server side.
       window.netlifyIdentity.on('init', user => {
         if (!user) {
           window.netlifyIdentity.on('login', () => {
             document.location.href = '/admin/';
           });
         }
+        // Force the widget to only show the Login screen, not the Signup tab.
+        // The widget exposes its container; we hide the signup link via CSS
+        // once it's rendered. Belt-and-suspenders alongside server-side
+        // invite-only registration.
+        injectAdminCss();
       });
+    }
+
+    function injectAdminCss() {
+      if (document.getElementById('hd-admin-css')) return;
+      const s = document.createElement('style');
+      s.id = 'hd-admin-css';
+      s.textContent = `
+        /* Hide the Netlify Identity Signup tab + footer link.
+           Identity widget renders its modal inside #netlify-identity-widget
+           with the markup .header > .nav buttons named "Log in" / "Sign up". */
+        #netlify-identity-widget button[data-cy="signup"],
+        #netlify-identity-widget .btnSignup,
+        #netlify-identity-widget a[data-cy="signup-link"],
+        #netlify-identity-widget [class*="signupLink"] {
+          display: none !important;
+          visibility: hidden !important;
+        }
+      `;
+      document.head.appendChild(s);
     }
   </script>
 </body>

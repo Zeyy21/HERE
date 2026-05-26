@@ -38,9 +38,15 @@
 
   async function boot() {
     const session = S && S.get();
-    const username = (session && session.username)
-      ? session.username
-      : 'Guest' + Math.floor(Math.random() * 9000 + 1000);
+
+    // ---- Chat is for signed-in members only. Guests + signed-out users
+    // see a clear gate explaining why.
+    const hasAccount = session && session.username && !session.guest;
+    if (!hasAccount) {
+      renderSignInGate(!!(session && session.guest));
+      return;
+    }
+    const username = session.username;
 
     // ---- Config sanity
     if (!cfg || !cfg.apiKey || cfg.apiKey === 'PASTE_FROM_FIREBASE_HERE' || !cfg.databaseURL) {
@@ -81,6 +87,24 @@
     }
 
     mountUI({ db, dbm, username, session });
+  }
+
+  // ---- Sign-in gate shown to guests and signed-out users
+  function renderSignInGate(isGuest) {
+    const root = document.getElementById('chatRoot');
+    root.innerHTML = `
+      <section class="chalk-card reveal" style="padding: 32px 24px; text-align: center; max-width: 560px; margin: 18px auto;">
+        <h2 class="tilt-r" style="margin-top: 0;">Sign in to chat</h2>
+        <p class="muted" style="max-width: 46ch; margin: 0 auto 16px;">
+          ${isGuest
+            ? "Guest sessions can't post in chat. Create a free account to join the conversation."
+            : "Chat is for signed-in Heredita members. Make a free account or sign in to join."}
+        </p>
+        <div class="row" style="justify-content: center; gap: 10px;">
+          <a class="btn btn-primary" href="index.html">Sign in or sign up</a>
+          <a class="btn btn-ghost" href="home.html">Back to home</a>
+        </div>
+      </section>`;
   }
 
   // ---- Setup screen shown when config is still the placeholder
@@ -131,17 +155,11 @@
 
           <h3 style="font-family:'Caveat',cursive; margin: 14px 0 6px;">Direct messages</h3>
           <ul class="chat-room-list" id="dmList"></ul>
-          ${session && !session.guest ? `
-            <form id="newDmForm" class="chat-new-dm" autocomplete="off">
-              <input id="newDmInput" type="text" minlength="3" maxlength="32"
-                     placeholder="Start DM with username…" required />
-              <button class="btn btn-ghost" type="submit">+</button>
-            </form>
-          ` : `
-            <p class="muted" style="font-size: .85rem; margin-top: 6px;">
-              <a href="index.html">Sign in</a> to start direct messages.
-            </p>
-          `}
+          <form id="newDmForm" class="chat-new-dm" autocomplete="off">
+            <input id="newDmInput" type="text" minlength="3" maxlength="32"
+                   placeholder="Start DM with username…" required />
+            <button class="btn btn-ghost" type="submit" title="Start DM">+</button>
+          </form>
         </aside>
 
         <section class="chalk-card chat-main" aria-live="polite">
