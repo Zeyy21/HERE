@@ -6,7 +6,7 @@
   <title>Heredita — Roleplay the World</title>
   <meta name="description" content="Heredita is a roleplay geopolitical simulator. Paint the map, roll the dice, rewrite history." />
   <link rel="icon" href="assets/heredita-icon.webp" type="image/webp" />
-  <link rel="stylesheet" href="css/chalkboard.css?v=20260525-7" />
+  <link rel="stylesheet" href="css/chalkboard.css?v=20260525-8" />
 </head>
 <body class="with-dust">
 
@@ -32,9 +32,10 @@
         </div>
 
         <div class="field">
-          <label for="su-email">Email</label>
-          <input id="su-email" name="email" type="email" autocomplete="email"
-                 placeholder="you@example.com" required />
+          <label for="su-email">Email <span class="muted" style="font-size:.85rem;">(used to sign back in)</span></label>
+          <input id="su-email" name="email" type="email" inputmode="email" autocomplete="email"
+                 placeholder="you@gmail.com" required
+                 pattern="[^\s@]+@[^\s@]+\.[^\s@]{2,}" />
         </div>
 
         <div class="field">
@@ -127,10 +128,10 @@
   </script>
 
   <!-- Firebase Auth (chat-config holds the Firebase project credentials) -->
-  <script src="js/chat-config.js?v=20260525-7"></script>
-  <script type="module" src="js/auth-firebase.js?v=20260525-7"></script>
+  <script src="js/chat-config.js?v=20260525-8"></script>
+  <script type="module" src="js/auth-firebase.js?v=20260525-8"></script>
 
-  <script src="js/api.js?v=20260525-7"></script>
-  <script src="js/app.js?v=20260525-7"></script>
+  <script src="js/api.js?v=20260525-8"></script>
+  <script src="js/app.js?v=20260525-8"></script>
 </body>
 </html>

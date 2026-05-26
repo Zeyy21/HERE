@@ -433,11 +433,19 @@
           const dob      = (fd.get('dob') || '').toString();
           const pw       = (fd.get('password') || '').toString();
           const pw2      = (fd.get('confirm') || '').toString();
+          // Pre-validate so users get clear errors before the network call.
+          const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
           if (username.length < 3) return toast('Username must be 3+ characters.');
-          if (!email)            return toast('Please enter your email.');
-          if (!dob)              return toast('Please enter your date of birth.');
-          if (pw.length < 6)     return toast('Password must be 6+ characters.');
-          if (pw !== pw2)        return toast('Passwords do not match.');
+          if (!/^[A-Za-z0-9_.\-]+$/.test(username))
+                                  return toast('Username: letters, numbers, _ . - only.');
+          if (!email)             return toast('Please enter your email.');
+          if (!EMAIL_RE.test(email))
+                                  return toast('Email looks wrong — needs an @ and a domain (e.g. you@gmail.com).');
+          if (email.toLowerCase() === username.toLowerCase())
+                                  return toast('Email and username are identical — did you paste the wrong value?');
+          if (!dob)               return toast('Please enter your date of birth.');
+          if (pw.length < 6)      return toast('Password must be 6+ characters.');
+          if (pw !== pw2)         return toast('Passwords do not match.');
 
           if (!FAUTH) {
             toast('Auth backend not loaded — refresh the page.');

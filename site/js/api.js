@@ -338,7 +338,8 @@
 
   // Expose
   window.HereditaAPI = {
-    BASE, PLAY_URL, PROD_ORIGIN,
+    BASE, PLAY_URL,
+    ALLOWED_ORIGINS,
     register, login, verifyTokenId, getMe,
     getFriends, sendFriendRequest, removeFriend,
     acceptFriendRequest, declineFriendRequest,

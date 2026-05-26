@@ -43,7 +43,17 @@
       ]);
       _app   = fb.initializeApp(cfg);
       _auth  = authm.getAuth(_app);
-      _db    = fsm.getFirestore(_app);
+      // Force long-polling so Firestore works behind strict networks / VPNs
+      // and so the initial connection establishes before we issue reads.
+      try {
+        _db = fsm.initializeFirestore(_app, {
+          experimentalAutoDetectLongPolling: true,
+          ignoreUndefinedProperties: true
+        });
+      } catch (e) {
+        // initializeFirestore can only be called once; fall back to getFirestore
+        _db = fsm.getFirestore(_app);
+      }
       _authm = authm;
       _fsm   = fsm;
 
@@ -111,15 +121,21 @@
   async function _usernameTaken(username) {
     const key = _normUsername(username);
     if (!key) return true;
-    try {
-      const snap = await _fsm.getDoc(_fsm.doc(_db, 'usernames', key));
-      return snap.exists();
-    } catch (e) {
-      console.warn('[heredita][auth] username check failed', e);
-      // If the check itself fails, err on the side of "available" and let
-      // the reservation write throw if there's a real collision.
-      return false;
+    // Try the fast path twice with a short delay — Firestore can return
+    // "offline" briefly during the first request after page load while it
+    // establishes the gRPC connection.
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const snap = await _fsm.getDoc(_fsm.doc(_db, 'usernames', key));
+        return snap.exists();
+      } catch (e) {
+        console.warn('[heredita][auth] username check failed (attempt ' + (attempt + 1) + ')', e && e.code);
+        if (attempt === 0) await new Promise(r => setTimeout(r, 600));
+      }
     }
+    // If both attempts fail, proceed. The reservation write below is
+    // atomic — a real collision will fail there and we'll roll back.
+    return false;
   }
 
   async function _resolveUsernameToEmail(username) {
