@@ -3,6 +3,10 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "outputDirectory": "site",
+  "rewrites": [
+    { "source": "/admin",  "destination": "/admin/index.html" },
+    { "source": "/admin/", "destination": "/admin/index.html" }
+  ],
   "headers": [
     {
       "source": "/(.*\\.html)",
@@ -14,6 +18,18 @@
       "source": "/",
       "headers": [
         { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }
+      ]
+    },
+    {
+      "source": "/admin",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }
+      ]
+    },
+    {
+      "source": "/admin/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-cache, must-revalidate" }
       ]
     },
     {
