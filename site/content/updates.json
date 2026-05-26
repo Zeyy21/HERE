@@ -1,6 +1,12 @@
 {
   "updates": [
     {
+      "version": "v0.5",
+      "date": "2026-05-25",
+      "tagline": "test",
+      "title": "testing"
+    },
+    {
       "version": "v0.4",
       "date": "2026-05-18",
       "title": "Loading screens, brush balancing, dice tweaks",
@@ -38,7 +44,7 @@
     },
     {
       "version": "v0.1",
-      "date": "2026-01-06",
+      "date": "2026-05-25",
       "title": "It's alive",
       "tagline": "First playable",
       "items": [
