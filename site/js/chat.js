@@ -148,6 +148,10 @@
   function mountUI({ db, dbm, username, session }) {
     const root = document.getElementById('chatRoot');
     root.innerHTML = `
+      <div class="section-title reveal">
+        <h1 class="tilt-l">Community Chat</h1>
+        <span class="muted">real-time · signed in as <strong style="color: var(--accent-soft);">${escapeHtml(username)}</strong></span>
+      </div>
       <div class="chat-layout">
         <aside class="chalk-card chat-sidebar">
           <h3 style="font-family:'Caveat',cursive; margin: 0 0 8px;">Rooms</h3>

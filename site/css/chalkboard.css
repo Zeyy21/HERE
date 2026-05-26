@@ -133,6 +133,13 @@ p, li, label, input, span, div, td, th {
 }
 
 p { color: var(--chalk-soft); max-width: 70ch; }
+/* When a paragraph sits inside a centered block, also center the
+   paragraph element itself so the 70ch max-width doesn't pin it left. */
+.text-center > p,
+.text-center p {
+  margin-left: auto;
+  margin-right: auto;
+}
 li  { color: var(--chalk-soft); }
 
 /* Buttons + tags keep the playful Caveat for chunky chalk feel */

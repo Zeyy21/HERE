@@ -468,11 +468,11 @@
     }
 
     // ---- sign in ----
+    // Existing accounts: no T&C re-check (they agreed at signup).
     const signinForm = $('#signinForm');
     if (signinForm) {
       signinForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        if (!tos.checked) { toast('Please agree to the Terms first.'); return; }
         const fd = new FormData(signinForm);
         const username = (fd.get('username') || '').toString().trim();
         const pw       = (fd.get('password') || '').toString();
