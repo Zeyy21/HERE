@@ -28,8 +28,51 @@
     try { return JSON.parse(localStorage.getItem(SESSION_KEY) || 'null'); }
     catch { return null; }
   }
-  function setSession(s) { localStorage.setItem(SESSION_KEY, JSON.stringify(s)); }
-  function clearSession() { localStorage.removeItem(SESSION_KEY); }
+  function setSession(s) {
+    localStorage.setItem(SESSION_KEY, JSON.stringify(s));
+    syncAuthCookie(s);
+  }
+  function clearSession() {
+    localStorage.removeItem(SESSION_KEY);
+    syncAuthCookie(null);
+  }
+
+  // ---- Cross-subdomain auth handoff via shared cookie.
+  // heredita.net and app.heredita.net share the parent domain `.heredita.net`,
+  // so a cookie scoped there is automatically sent on every request to both.
+  // The game app can read document.cookie on load and skip its own sign-in.
+  //
+  // Cookie shape: heredita_auth = base64({ token, username, ts })
+  //   - Not HttpOnly (we set it from JS; can't be HttpOnly otherwise)
+  //   - Secure + SameSite=Lax (only sent on https + same-site navigations)
+  //   - 7-day expiry
+  function syncAuthCookie(session) {
+    // Only set cookies in browser contexts on the production domain. On
+    // localhost / vercel previews, document.cookie with Domain= is ignored.
+    const onHeredita = (location.hostname === 'heredita.net' || location.hostname.endsWith('.heredita.net'));
+    if (!onHeredita) return;
+    const isSignedIn = session && session.token && session.username && !session.guest;
+    if (isSignedIn) {
+      const payload = btoa(JSON.stringify({
+        token: session.token,
+        username: session.username,
+        ts: Date.now()
+      }));
+      // 7 days
+      const exp = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toUTCString();
+      document.cookie = `heredita_auth=${payload}; Domain=.heredita.net; Path=/; Expires=${exp}; Secure; SameSite=Lax`;
+    } else {
+      // Expire the cookie immediately.
+      document.cookie = `heredita_auth=; Domain=.heredita.net; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Secure; SameSite=Lax`;
+    }
+  }
+
+  // Run once on load to ensure the cookie matches the stored session
+  // (handles the case where a user signs in on device A, then opens device B
+  // and we want the game to also see them as signed in).
+  function syncCookieOnLoad() {
+    syncAuthCookie(getSession());
+  }
 
   // ---- Sign-in detection: a session counts as "signed in" if it has a
   // game-API token + username and isn't flagged as guest. ----
@@ -178,7 +221,8 @@
   window.HereditaSession = {
     get: getSession, set: setSession, clear: clearSession,
     getTier, setTier, canSwitchTier, isTierPaid, isSignedIn,
-    openPaywall, openTierGate, TIER_LABEL
+    openPaywall, openTierGate, TIER_LABEL,
+    syncAuthCookie
   };
   // Back-compat shim: anything still calling `isTierLocked` now means "paid".
   window.HereditaSession.isTierLocked = isTierPaid;
@@ -679,6 +723,9 @@
   document.addEventListener('DOMContentLoaded', () => {
     sanitizeStoredTier();
     applyFreeHatIfEligible();
+    // Mirror local session into the shared .heredita.net cookie so the
+    // game app on app.heredita.net auto-recognizes the signed-in user.
+    syncCookieOnLoad();
     wireNavToggle();
     // Verify any stored game-API token in the background (non-blocking).
     verifyStoredToken();
