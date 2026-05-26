@@ -1,16 +1,19 @@
 # Netlify config for Heredita.
 #
-# This file exists ONLY so Netlify can host Identity + Git Gateway for
-# Decap CMS. The actual site is deployed on Vercel — Netlify never serves
-# Heredita's pages, it just provides the OAuth/Identity service.
+# Heredita is hosted on Vercel — Netlify is used ONLY as a free host for
+# the Identity + Git Gateway services that Decap CMS authenticates against.
+# Netlify never serves the live pages.
 #
-# `netlify init` reads this file to learn that there's no build step and
-# the published directory is `site/`. If you later want to mirror the
-# site to Netlify too, this same config works for that.
+# We deliberately disable builds + deploys on this Netlify project so it
+# doesn't ship a duplicate copy of the site or run any build command.
 
 [build]
   publish  = "site"
-  command  = ""
+  # No build step. Leave blank so Netlify just no-ops.
+  command  = "echo 'No build — Netlify hosts only the Identity service'"
 
-# Identity + Git Gateway are enabled per-site in the Netlify dashboard,
-# not in this file. See site/admin/config.yml for the steps.
+[build.processing]
+  skip_processing = true
+
+# Identity + Git Gateway are enabled per-site in the Netlify dashboard.
+# See site/admin/config.yml for the exact steps.
